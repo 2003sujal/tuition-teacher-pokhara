@@ -12,6 +12,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Hide the "N" development badge in the corner (errors are still shown).
+  devIndicators: false,
   serverExternalPackages: ["mongoose", "cloudinary"],
   images: {
     remotePatterns: [{ protocol: "https", hostname: "res.cloudinary.com" }],
@@ -26,6 +28,10 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
+  },
+  // The agency's marketing website is a static page in public/website.
+  async rewrites() {
+    return [{ source: "/website", destination: "/website/index.html" }];
   },
 };
 

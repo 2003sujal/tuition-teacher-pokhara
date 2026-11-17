@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { FileText, UploadCloud, RefreshCw, X, ShieldCheck, ArrowRight, Camera, Loader2 } from "lucide-react";
+import { FileText, UploadCloud, RefreshCw, X, ShieldCheck, Camera, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { applicationFieldsSchema } from "@/lib/validations";
 import { checkCvMeta } from "@/lib/file-validation";
@@ -13,8 +13,6 @@ import { CV_ACCEPT_ATTR, CV_MAX_LABEL } from "@/lib/constants";
 import { compressImage } from "@/lib/compress-image";
 import { SubjectPicker } from "./subject-picker";
 import { formatBytes, cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Input, Label, FieldError } from "@/components/ui/input";
 
 const formSchema = applicationFieldsSchema.extend({
   cv: z
@@ -120,83 +118,80 @@ export function ApplyForm() {
   }
 
   return (
-    <form onSubmit={(e) => handleSubmit(onSubmit)(e)} noValidate className="space-y-5">
+    <form onSubmit={(e) => handleSubmit(onSubmit)(e)} noValidate className="sf">
       {/* Honeypot: invisible to people, tempting to bots. */}
-      <div aria-hidden className="absolute -left-[9999px] h-px w-px overflow-hidden">
+      <div aria-hidden className="sf-honeypot">
         <label htmlFor="website">Website</label>
         <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="fullName">
-          Full name <span className="text-danger">*</span>
-        </Label>
-        <Input
-          id="fullName"
-          autoComplete="name"
-          placeholder="Enter your full name"
-          className="h-12 text-base sm:h-11 sm:text-sm"
-          aria-invalid={!!errors.fullName}
-          aria-describedby={errors.fullName ? "fullName-error" : undefined}
-          {...register("fullName")}
-        />
-        <FieldError id="fullName-error">{errors.fullName?.message}</FieldError>
-      </div>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="mobileNumber">
-          Mobile number <span className="text-danger">*</span>
-        </Label>
-        <div className="flex">
-          <span className="inline-flex items-center rounded-l-lg border border-r-0 border-border-strong bg-surface-muted px-3 text-sm font-medium text-muted-foreground">
-            +977
-          </span>
-          <Input
-            id="mobileNumber"
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel-national"
-            placeholder="Enter your mobile number"
-            className="h-12 rounded-l-none text-base sm:h-11 sm:text-sm"
-            aria-invalid={!!errors.mobileNumber}
-            aria-describedby="mobileNumber-hint"
-            {...register("mobileNumber")}
+      <div className="sf-row">
+        <div className="sf-field">
+          <label className="sf-label" htmlFor="fullName">
+            Full name <span className="sf-req" aria-hidden>*</span>
+          </label>
+          <input
+            className="sf-input"
+            id="fullName"
+            autoComplete="name"
+            placeholder="Enter your full name"
+            aria-required="true"
+            aria-invalid={!!errors.fullName}
+            aria-describedby={errors.fullName ? "fullName-error" : undefined}
+            {...register("fullName")}
           />
+          <FieldMessage id="fullName-error" error={errors.fullName?.message} />
         </div>
-        {errors.mobileNumber ? (
-          <FieldError id="mobileNumber-hint">{errors.mobileNumber.message}</FieldError>
-        ) : (
-          <p id="mobileNumber-hint" className="text-[13px] text-subtle-foreground">
-            10-digit number, e.g. 98XXXXXXXX
-          </p>
-        )}
+
+        <div className="sf-field">
+          <label className="sf-label" htmlFor="mobileNumber">
+            Mobile number <span className="sf-req" aria-hidden>*</span>
+          </label>
+          <div className="sf-prefixed">
+            <span className="sf-prefix" aria-hidden>+977</span>
+            <input
+              className="sf-input"
+              id="mobileNumber"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel-national"
+              placeholder="Enter your mobile number"
+              aria-required="true"
+              aria-invalid={!!errors.mobileNumber}
+              aria-describedby="mobileNumber-hint"
+              {...register("mobileNumber")}
+            />
+          </div>
+          <FieldMessage id="mobileNumber-hint" error={errors.mobileNumber?.message} hint="10-digit number, e.g. 98XXXXXXXX" />
+        </div>
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="location">
-          Current location <span className="text-danger">*</span>
-        </Label>
-        <Input
+      <div className="sf-field">
+        <label className="sf-label" htmlFor="location">
+          Current location <span className="sf-req" aria-hidden>*</span>
+        </label>
+        <input
+          className="sf-input"
           id="location"
           autoComplete="address-level2"
           placeholder="Example: Lakeside, Pokhara"
-          className="h-12 text-base sm:h-11 sm:text-sm"
+          aria-required="true"
           aria-invalid={!!errors.location}
           aria-describedby={errors.location ? "location-error" : undefined}
           {...register("location")}
         />
-        <FieldError id="location-error">{errors.location?.message}</FieldError>
+        <FieldMessage id="location-error" error={errors.location?.message} />
       </div>
 
       <Controller
         control={control}
         name="subjects"
         render={({ field }) => (
-          <div className="space-y-1.5">
-            <Label id="subjects-label" htmlFor="subjects">
-              Subjects you can teach <span className="text-danger">*</span>
-            </Label>
-            <p id="subjects-hint" className="text-[13px] text-subtle-foreground">
+          <div className="sf-field sf-subjects">
+            <label className="sf-label" id="subjects-label" htmlFor="subjects">
+              Subjects you can teach <span className="sf-req" aria-hidden>*</span>
+            </label>
+            <p id="subjects-hint" className="sf-hint">
               Tap all that apply, or add your own.
             </p>
             <SubjectPicker
@@ -209,7 +204,7 @@ export function ApplyForm() {
               invalid={!!errors.subjects}
               describedBy="subjects-hint"
             />
-            <FieldError>{errors.subjects?.message ?? errors.subjects?.root?.message}</FieldError>
+            <FieldMessage error={errors.subjects?.message ?? errors.subjects?.root?.message} />
           </div>
         )}
       />
@@ -220,10 +215,10 @@ export function ApplyForm() {
         render={({ field }) => {
           const file = field.value as File | null;
           return (
-            <div className="space-y-1.5">
-              <Label htmlFor="cv">
-                Upload CV / Resume <span className="text-danger">*</span>
-              </Label>
+            <div className="sf-field">
+              <label className="sf-label" htmlFor="cv">
+                Upload CV / Resume <span className="sf-req" aria-hidden>*</span>
+              </label>
               <input
                 ref={fileInput}
                 id="cv"
@@ -250,43 +245,32 @@ export function ApplyForm() {
                 }}
               />
               {preparing ? (
-                <div className="flex items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 py-8 text-sm text-muted-foreground">
-                  <Loader2 className="size-4 animate-spin" aria-hidden /> Preparing your photo…
+                <div className="sf-drop sf-drop--busy" role="status">
+                  <Loader2 className="sf-spin" aria-hidden /> Preparing your photo…
                 </div>
               ) : file ? (
-                <div
-                  className={cn(
-                    "flex items-center gap-3 rounded-xl border bg-surface p-3",
-                    errors.cv ? "border-danger" : "border-border-strong"
-                  )}
-                >
+                <div className={cn("sf-file", errors.cv && "is-invalid")}>
                   {preview ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={preview} alt="Preview of your CV photo" className="size-12 shrink-0 rounded-lg border border-border object-cover" />
+                    <img src={preview} alt="Preview of your CV photo" className="sf-file__thumb" />
                   ) : (
-                    <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary-soft text-primary">
-                      <FileText className="size-5" aria-hidden />
+                    <span className="sf-file__icon">
+                      <FileText aria-hidden />
                     </span>
                   )}
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium" title={file.name}>
+                  <div className="sf-file__meta">
+                    <p className="sf-file__name" title={file.name}>
                       {file.name}
                     </p>
-                    <p className="text-xs text-muted-foreground">{formatBytes(file.size)}</p>
+                    <p className="sf-file__size">{formatBytes(file.size)}</p>
                   </div>
-                  <Button type="button" variant="ghost" size="sm" onClick={() => fileInput.current?.click()}>
+                  <button type="button" className="sf-btn sf-btn--ghost" onClick={() => fileInput.current?.click()}>
                     <RefreshCw aria-hidden />
                     Replace
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label="Remove file"
-                    onClick={clearFile}
-                  >
-                    <X />
-                  </Button>
+                  </button>
+                  <button type="button" className="sf-btn sf-btn--ghost sf-btn--icon" aria-label="Remove file" onClick={clearFile}>
+                    <X aria-hidden />
+                  </button>
                 </div>
               ) : (
                 <button
@@ -302,56 +286,58 @@ export function ApplyForm() {
                     setDragging(false);
                     pickFile(e.dataTransfer.files?.[0]);
                   }}
-                  className={cn(
-                    "flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-8 text-center transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-                    dragging ? "border-primary bg-primary-soft" : "border-border-strong bg-surface hover:border-primary/60 hover:bg-primary-soft/40",
-                    errors.cv && "border-danger"
-                  )}
+                  className={cn("sf-drop", dragging && "is-dragging", errors.cv && "is-invalid")}
                 >
-                  <span className="grid size-11 place-items-center rounded-full bg-primary-soft text-primary">
-                    <UploadCloud className="size-5" aria-hidden />
+                  <UploadCloud className="sf-drop__icon" aria-hidden />
+                  <span className="sf-drop__title">
+                    Tap to choose a file<span className="sf-drop__drag"> or drag it here</span>
                   </span>
-                  <span className="text-sm font-medium text-foreground">
-                    <span className="text-primary">Tap to choose a file</span>
-                    <span className="hidden sm:inline"> or drag it here</span>
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    PDF, Word or a photo of your CV · up to {CV_MAX_LABEL}
-                  </span>
+                  <span className="sf-drop__note">PDF, Word or a photo of your CV, up to {CV_MAX_LABEL}.</span>
                 </button>
               )}
               {!file && !preparing && (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="w-full sm:hidden"
-                  onClick={() => cameraInput.current?.click()}
-                >
+                <button type="button" className="sf-btn sf-camera" onClick={() => cameraInput.current?.click()}>
                   <Camera aria-hidden /> Take a photo of your CV
-                </Button>
+                </button>
               )}
-              <FieldError>{errors.cv?.message as string | undefined}</FieldError>
+              <FieldMessage error={errors.cv?.message as string | undefined} />
             </div>
           );
         }}
       />
 
       {serverError && (
-        <div role="alert" className="rounded-lg border border-danger/25 bg-danger-soft px-3.5 py-3 text-sm text-danger">
+        <div role="alert" className="sf-alert">
           {serverError}
         </div>
       )}
 
-      <Button type="submit" size="lg" className="w-full" loading={submitting}>
+      <button type="submit" className="sf-btn sf-btn--primary sf-submit" disabled={submitting} aria-busy={submitting}>
+        {submitting && <Loader2 className="sf-spin" aria-hidden />}
         {submitting ? "Submitting…" : "Submit Application"}
-        {!submitting && <ArrowRight aria-hidden />}
-      </Button>
+      </button>
 
-      <p className="flex items-start gap-2 text-[13px] leading-relaxed text-muted-foreground">
-        <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-600" aria-hidden />
+      <p className="sf-privacy">
+        <ShieldCheck aria-hidden />
         Your details and CV are stored securely and are only visible to the Tuition Teacher Pokhara team. We use
         them solely to contact you about tuition opportunities and never share them publicly.
       </p>
     </form>
   );
+}
+
+function FieldMessage({ id, error, hint }: { id?: string; error?: string; hint?: string }) {
+  if (error)
+    return (
+      <p id={id} role="alert" className="sf-error">
+        {error}
+      </p>
+    );
+  if (hint)
+    return (
+      <p id={id} className="sf-hint">
+        {hint}
+      </p>
+    );
+  return null;
 }
