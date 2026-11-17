@@ -4,6 +4,7 @@ import { uploadLogo } from "@/lib/cloudinary";
 import { guardAdmin, jsonError } from "@/lib/api";
 import { LOGO_ALLOWED_TYPES, LOGO_MAX_BYTES } from "@/lib/constants";
 import { Settings } from "@/models/Settings";
+import { invalidateSettings } from "@/lib/data/settings";
 
 export const runtime = "nodejs";
 
@@ -37,6 +38,7 @@ export async function POST(req: Request) {
     const url = await uploadLogo(buffer);
     await connectDB();
     await Settings.findOneAndUpdate({ key: "global" }, { $set: { logo: url } }, { upsert: true });
+    invalidateSettings();
     return NextResponse.json({ ok: true, url });
   } catch (err) {
     console.error("Logo upload failed", err);
@@ -49,5 +51,6 @@ export async function DELETE(req: Request) {
   if (response) return response;
   await connectDB();
   await Settings.findOneAndUpdate({ key: "global" }, { $set: { logo: "" } }, { upsert: true });
+  invalidateSettings();
   return NextResponse.json({ ok: true });
 }

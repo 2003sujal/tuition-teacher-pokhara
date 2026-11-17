@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Types } from "mongoose";
 import { connectDB } from "@/lib/mongodb";
 import { uploadCv, deleteCv } from "@/lib/cloudinary";
 import { applicationFieldsSchema } from "@/lib/validations";
@@ -21,6 +22,13 @@ export async function POST(req: Request) {
   const length = Number(req.headers.get("content-length") ?? 0);
   if (length > CV_MAX_BYTES + 64 * 1024) return jsonError("File is too large", 413);
 
+  // Start the database work now so it overlaps with receiving the file.
+  const dbReady = connectDB();
+  dbReady.catch(() => {}); // a failure surfaces where it is awaited
+  const ip = clientIp(req);
+  const limitCheck = dbReady.then(() => rateLimit(`apply:${ip}`, 5, 60 * 60)); // 5 submissions / hour / IP
+  limitCheck.catch(() => {}); // awaited below; avoid an unhandled rejection on early returns
+
   let form: FormData;
   try {
     form = await req.formData();
@@ -36,8 +44,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const ip = clientIp(req);
-    const limit = await rateLimit(`apply:${ip}`, 5, 60 * 60); // 5 submissions / hour / IP
+    const limit = await limitCheck;
     if (!limit.ok) return jsonError("Too many submissions from this network. Please try again later.", 429);
   } catch (err) {
     console.error("Rate limit check failed", err);
@@ -69,12 +76,25 @@ export async function POST(req: Request) {
   const normalized = normalizeNepaliMobile(parsed.data.mobileNumber)!;
 
   try {
-    await connectDB();
-    const applicationId = await nextApplicationId();
-    const uploaded = await uploadCv(buffer, { applicationId, extension: meta.extension });
+    await dbReady;
+    // The application number and the Cloudinary upload don't depend on each other: run them together.
+    const [idResult, uploadResult] = await Promise.allSettled([
+      nextApplicationId(),
+      uploadCv(buffer, { extension: meta.extension }),
+    ]);
+    if (idResult.status === "rejected" || uploadResult.status === "rejected") {
+      if (uploadResult.status === "fulfilled") await deleteCv(uploadResult.value.publicId).catch(() => {});
+      throw idResult.status === "rejected" ? idResult.reason : (uploadResult as PromiseRejectedResult).reason;
+    }
+    const applicationId = idResult.value;
+    const uploaded = uploadResult.value;
 
+    // Pre-assign the id so the tutor record and its history entry are written together.
+    const tutorId = new Types.ObjectId();
     try {
-      const tutor = await Tutor.create({
+      await Promise.all([
+        Tutor.create({
+        _id: tutorId,
         applicationId,
         fullName: parsed.data.fullName.replace(/\s+/g, " "),
         mobileNumber: normalized,
@@ -90,16 +110,21 @@ export async function POST(req: Request) {
         cvFileSize: uploaded.bytes || buffer.byteLength,
         cvUploadedAt: new Date(),
         status: "New",
-      });
-      await ActivityLog.create({
-        tutorId: tutor._id,
-        action: "application_submitted",
-        newValue: "New",
-        note: "Submitted via public registration form",
-      });
+        }),
+        ActivityLog.create({
+          tutorId,
+          action: "application_submitted",
+          newValue: "New",
+          note: "Submitted via public registration form",
+        }),
+      ]);
     } catch (dbErr) {
-      // Don't leave orphaned files in Cloudinary if the DB write fails.
-      await deleteCv(uploaded.publicId).catch(() => {});
+      // Don't leave orphaned files or half-written records if a DB write fails.
+      await Promise.all([
+        deleteCv(uploaded.publicId).catch(() => {}),
+        Tutor.deleteOne({ _id: tutorId }).catch(() => {}),
+        ActivityLog.deleteMany({ tutorId }).catch(() => {}),
+      ]);
       throw dbErr;
     }
 

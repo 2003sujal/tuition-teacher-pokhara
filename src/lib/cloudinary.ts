@@ -1,5 +1,11 @@
 import "server-only";
+import { Agent } from "node:https";
+import { randomUUID } from "node:crypto";
 import { v2 as cloudinary, type UploadApiResponse } from "cloudinary";
+
+// Reuse TLS connections to Cloudinary between uploads on a warm server
+// (a fresh connection costs about two extra seconds).
+const keepAliveAgent = new Agent({ keepAlive: true, maxSockets: 10 });
 
 let configured = false;
 
@@ -22,7 +28,7 @@ function client() {
 
 function uploadBuffer(buffer: Buffer, options: Record<string, unknown>) {
   return new Promise<UploadApiResponse>((resolve, reject) => {
-    const stream = client().uploader.upload_stream(options, (error, result) => {
+    const stream = client().uploader.upload_stream({ agent: keepAliveAgent, ...options }, (error, result) => {
       if (error || !result) return reject(error ?? new Error("Upload failed"));
       resolve(result);
     });
@@ -37,13 +43,13 @@ const CV_FOLDER = "tuition-teacher-pokhara/cvs";
  * cannot be fetched via their plain URL; access always goes through a
  * short-lived signed URL generated for a logged-in administrator.
  */
-export async function uploadCv(buffer: Buffer, opts: { applicationId: string; extension: string }) {
+export async function uploadCv(buffer: Buffer, opts: { extension: string }) {
   const result = await uploadBuffer(buffer, {
     resource_type: "raw",
     type: "authenticated",
     folder: CV_FOLDER,
     // Raw assets keep the extension inside the public_id.
-    public_id: `${opts.applicationId}-${Date.now()}.${opts.extension}`,
+    public_id: `cv-${Date.now()}-${randomUUID().slice(0, 8)}.${opts.extension}`,
     overwrite: false,
     use_filename: false,
   });

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { guardAdmin, validationError } from "@/lib/api";
 import { settingsSchema } from "@/lib/validations";
-import { getSettings } from "@/lib/data/settings";
+import { getSettings, invalidateSettings } from "@/lib/data/settings";
 import { Settings } from "@/models/Settings";
 
 export const runtime = "nodejs";
@@ -22,5 +22,6 @@ export async function PUT(req: Request) {
 
   await connectDB();
   await Settings.findOneAndUpdate({ key: "global" }, { $set: parsed.data }, { upsert: true });
+  invalidateSettings();
   return NextResponse.json({ ok: true });
 }

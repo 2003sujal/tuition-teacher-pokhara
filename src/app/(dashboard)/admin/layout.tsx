@@ -10,9 +10,13 @@ export const metadata: Metadata = { robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
-  const admin = await requireAdmin();
-  await connectDB();
-  const [settings, newCount] = await Promise.all([getSettings(), Tutor.countDocuments({ status: "New" })]);
+  // The session check and the shell's data run in parallel (one round trip, not two).
+  // proxy.ts has already turned away visitors without a signed session cookie.
+  const [admin, settings, newCount] = await Promise.all([
+    requireAdmin(),
+    getSettings(),
+    connectDB().then(() => Tutor.countDocuments({ status: "New" })),
+  ]);
 
   return (
     <Suspense>
