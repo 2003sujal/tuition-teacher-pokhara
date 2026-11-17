@@ -46,7 +46,13 @@ export async function getSettings(): Promise<AgencySettings> {
       return cached?.value ?? { ...DEFAULT_SETTINGS };
     });
   globalForSettings.__ttpSettings = { value: cached?.value ?? { ...DEFAULT_SETTINGS }, expires: 0, pending };
-  return pending;
+
+  // Never let a slow or unreachable database hold up a page: after 2.5s use the
+  // last known settings (or the defaults) and let the load finish in the background.
+  const fallback = new Promise<AgencySettings>((resolve) =>
+    setTimeout(() => resolve(cached?.value ?? { ...DEFAULT_SETTINGS }), 2500)
+  );
+  return Promise.race([pending, fallback]);
 }
 
 /** Call after settings are saved so the next read hits the database. */
