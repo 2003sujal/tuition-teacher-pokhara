@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink, Download, FileText, ImageIcon, BookOpen, Hash, Phone, MapPin, CalendarDays, History } from "lucide-react";
+import { ArrowLeft, ExternalLink, Download, FileText, ImageIcon, BookOpen, Hash, Phone, MapPin, CalendarDays, History, FileSignature } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
 import { isObjectId } from "@/lib/api";
 import { getTutor, getTutorActivity } from "@/lib/data/tutors";
@@ -115,6 +115,13 @@ export default async function TutorProfilePage({ params }: PageProps<"/admin/tut
                     </span>
                   ) : (
                     <span className="font-normal text-muted-foreground">Not provided</span>
+                  )}
+                </Detail>
+                <Detail icon={FileSignature} label="Service agreement">
+                  {tutor.agreementAcceptedAt ? (
+                    <span className="text-emerald-700">Accepted {formatDateTime(tutor.agreementAcceptedAt)}</span>
+                  ) : (
+                    <span className="font-normal text-muted-foreground">Not signed yet — send the agreement link from the dashboard</span>
                   )}
                 </Detail>
                 <Detail icon={CalendarDays} label="Registered">{formatDateTime(tutor.createdAt)}</Detail>

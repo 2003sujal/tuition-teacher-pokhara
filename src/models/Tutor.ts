@@ -22,6 +22,10 @@ const TutorSchema = new Schema(
     status: { type: String, enum: TUTOR_STATUSES, default: "New" },
     adminNotes: { type: String, default: "", maxlength: 5000 },
     archivedAt: { type: Date },
+    // Tutor service agreement (accepted on the public /agreement page).
+    agreementAcceptedAt: { type: Date },
+    agreementSignedName: { type: String, trim: true, maxlength: 100 },
+    agreementVersion: { type: String },
   },
   { timestamps: true }
 );

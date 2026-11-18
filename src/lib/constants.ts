@@ -84,6 +84,28 @@ export const COMPANY = {
   mapUrl: "https://maps.app.goo.gl/4qWHREYWgfWsPsSeA",
 };
 
+// ---- Tutor service agreement ---------------------------------------------
+
+/** Bump when the agreement wording changes; stored with each acceptance. */
+export const AGREEMENT_VERSION = "2026-11";
+
+/** Service charge on the tutor's first month salary (NPR). */
+export const COMMISSION_TIERS = [
+  { upTo: 5000, label: "Below Rs. 5,000", charge: "Rs. 1,000 (flat)", flat: 1000 },
+  { upTo: 10000, label: "Rs. 5,000 – Rs. 9,999", charge: "20% of first month salary", percent: 20 },
+  { upTo: 15000, label: "Rs. 10,000 – Rs. 14,999", charge: "30% of first month salary", percent: 30 },
+  { upTo: Infinity, label: "Rs. 15,000 and above", charge: "35% of first month salary", percent: 35 },
+] as const;
+
+/** Our service charge for a monthly salary, per the agreement. */
+export function commissionFor(monthlySalary: number) {
+  const tier = COMMISSION_TIERS.find((t) => monthlySalary < t.upTo) ?? COMMISSION_TIERS[COMMISSION_TIERS.length - 1]!;
+  return "flat" in tier ? tier.flat : Math.round((monthlySalary * tier.percent) / 100);
+}
+
+export const DEMO_DEPOSIT = 1000;
+export const DEMO_FREE_DAYS = 3;
+
 export const SESSION_COOKIE = "ttp_session";
 export const SESSION_TTL_SECONDS = 60 * 60 * 8; // 8 hours
 

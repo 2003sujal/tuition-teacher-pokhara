@@ -1,4 +1,4 @@
-import { ArrowRight, Briefcase, FilePlus2, Pencil, RefreshCcw, StickyNote } from "lucide-react";
+import { ArrowRight, Briefcase, FileCheck2, FilePlus2, Pencil, RefreshCcw, StickyNote } from "lucide-react";
 import type { ActivityItem } from "@/lib/data/tutors";
 import type { TutorStatus } from "@/lib/constants";
 import { TUTOR_STATUSES } from "@/lib/constants";
@@ -12,6 +12,7 @@ const ICONS = {
   notes_updated: StickyNote,
   hire_added: Briefcase,
   hire_removed: Briefcase,
+  agreement_accepted: FileCheck2,
 } as Record<string, React.ComponentType<{ className?: string }>>;
 
 const isStatus = (v: string): v is TutorStatus => (TUTOR_STATUSES as readonly string[]).includes(v);
@@ -35,6 +36,8 @@ function Description({ item }: { item: ActivityItem }) {
       return <span>Admin notes updated</span>;
     case "hire_added":
       return <span>Hire recorded{item.newValue && <>: <span className="font-medium">{item.newValue}</span></>}</span>;
+    case "agreement_accepted":
+      return <span>Accepted the tutor service agreement online</span>;
     case "hire_removed":
       return <span>Hire record removed{item.previousValue && <>: {item.previousValue}</>}</span>;
     default:

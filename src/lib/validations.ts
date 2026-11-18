@@ -98,6 +98,18 @@ export const hireSchema = z.object({
 
 export type HireInput = z.infer<typeof hireSchema>;
 
+const mustAccept = (message: string) => z.literal(true, { error: message });
+
+/** Public tutor service agreement acceptance. */
+export const agreementSchema = z.object({
+  fullName: fullNameSchema,
+  mobileNumber: mobileSchema,
+  acceptCharges: mustAccept("Please confirm you accept the service charges"),
+  acceptDemo: mustAccept("Please confirm you accept the demo class policy"),
+  acceptConfidential: mustAccept("Please confirm you will keep this agreement confidential"),
+  acceptAll: mustAccept("Please confirm you have read and will follow this agreement"),
+});
+
 export const notesSchema = z.object({
   adminNotes: z.string().max(5000, "Notes must be at most 5000 characters"),
 });

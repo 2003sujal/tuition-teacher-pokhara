@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Briefcase, ImagePlus, MapPin, Plus, Trash2, X } from "lucide-react";
 import type { HireRow } from "@/lib/data/hires";
-import { POSTER_ALLOWED_TYPES, POSTER_MAX_BYTES } from "@/lib/constants";
+import { POSTER_ALLOWED_TYPES, POSTER_MAX_BYTES, commissionFor } from "@/lib/constants";
 import { compressImage } from "@/lib/compress-image";
 import { formatDate, formatNpr } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -233,6 +233,14 @@ function AddHireForm({ tutorId, tutorName, onDone }: { tutorId: string; tutorNam
         {salaryNum > 0 && (
           <div className="-mt-2 flex flex-wrap items-center gap-1.5">
             <span className="text-xs text-muted-foreground">Commission:</span>
+            <button
+              type="button"
+              onClick={() => setCommission(String(commissionFor(salaryNum)))}
+              className="rounded-full border border-primary/40 bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary hover:bg-primary-soft/70 cursor-pointer"
+              title="Rate from the tutor service agreement"
+            >
+              Policy rate = {formatNpr(commissionFor(salaryNum))}
+            </button>
             {[25, 50, 100].map((pct) => (
               <button
                 key={pct}

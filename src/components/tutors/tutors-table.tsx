@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText, Download, ChevronLeft, ChevronRight, SearchX, Inbox } from "lucide-react";
+import { FileText, FileCheck2, Download, ChevronLeft, ChevronRight, SearchX, Inbox } from "lucide-react";
 import type { TutorRow } from "@/lib/data/tutors";
 import { formatMobile } from "@/lib/phone";
 import { formatBytes, formatDate } from "@/lib/utils";
@@ -7,6 +7,20 @@ import { PAGE_SIZE } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "./status-badge";
 import { RowActions } from "./row-actions";
+
+/** Small "agreement signed" tick next to a tutor's name. */
+function AgreedMark({ at }: { at: string | null }) {
+  if (!at) return null;
+  return (
+    <span
+      className="ml-1.5 inline-flex items-center gap-0.5 align-middle text-[11px] font-medium text-emerald-700"
+      title={`Service agreement accepted ${formatDate(at)}`}
+    >
+      <FileCheck2 className="size-3.5" aria-hidden />
+      Agreed
+    </span>
+  );
+}
 
 export function SubjectTags({ subjects, max = 2 }: { subjects: string[]; max?: number }) {
   if (!subjects.length) return <span className="text-subtle-foreground">—</span>;
@@ -123,6 +137,7 @@ export function TutorsTable({
                   <Link href={`/admin/tutors/${t.id}`} className="font-medium text-foreground hover:text-primary">
                     {t.fullName}
                   </Link>
+                  <AgreedMark at={t.agreementAcceptedAt} />
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 tabular text-foreground">{formatMobile(t.normalizedMobileNumber)}</td>
                 <td className="max-w-40 truncate px-4 py-3 text-foreground" title={t.location}>{t.location}</td>
@@ -147,6 +162,7 @@ export function TutorsTable({
                   {t.fullName}
                 </Link>
                 <StatusBadge status={t.status} />
+                <AgreedMark at={t.agreementAcceptedAt} />
               </div>
               <p className="mt-0.5 text-[13px] text-muted-foreground">
                 {formatMobile(t.normalizedMobileNumber)} · {t.location}

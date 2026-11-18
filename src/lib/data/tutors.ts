@@ -21,6 +21,7 @@ export type TutorRow = {
   cvFileSize: number;
   cvUploadedAt: string;
   status: TutorStatus;
+  agreementAcceptedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -43,13 +44,14 @@ function toRow(t: LeanTutor): TutorRow {
     cvFileSize: t.cvFileSize,
     cvUploadedAt: new Date(t.cvUploadedAt ?? t.createdAt).toISOString(),
     status: t.status as TutorStatus,
+    agreementAcceptedAt: t.agreementAcceptedAt ? new Date(t.agreementAcceptedAt).toISOString() : null,
     createdAt: new Date(t.createdAt).toISOString(),
     updatedAt: new Date(t.updatedAt).toISOString(),
   };
 }
 
 const ROW_FIELDS =
-  "applicationId fullName mobileNumber normalizedMobileNumber location subjects cvFileName cvFileType cvFileSize cvUploadedAt status createdAt updatedAt";
+  "applicationId fullName mobileNumber normalizedMobileNumber location subjects cvFileName cvFileType cvFileSize cvUploadedAt status agreementAcceptedAt createdAt updatedAt";
 
 /** Parse a YYYY-MM-DD date as Nepal local midnight (UTC+05:45). */
 export function nepalDate(date: string, endOfDay = false) {

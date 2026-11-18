@@ -9,6 +9,7 @@ export const ACTIVITY_ACTIONS = [
   "tutor_deleted",
   "hire_added",
   "hire_removed",
+  "agreement_accepted",
 ] as const;
 
 const ActivityLogSchema = new Schema(

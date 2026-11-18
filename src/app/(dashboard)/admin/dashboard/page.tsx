@@ -29,6 +29,7 @@ export default async function DashboardPage() {
   ]);
   const link = registrationLink(settings);
   const certificateLink = `${PUBLIC_SITE_URL}${COMPANY.certificate}`;
+  const agreementLink = `${PUBLIC_SITE_URL}/agreement`;
   const firstName = admin.name.split(" ")[0];
   const thisMonth = monthly.at(-1)?.count ?? 0;
 
@@ -170,6 +171,28 @@ export default async function DashboardPage() {
           <p className="mt-0.5 truncate font-mono text-[13px] text-muted-foreground">{link}</p>
         </div>
         <CopyLinkButton url={link} variant="soft" />
+      </Card>
+
+      <Card className="mt-4 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold">Tutor service agreement link</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Send this to a registered tutor. When they accept, they move to{" "}
+            <Link href="/admin/tutors?status=Contacted" className="font-medium text-primary hover:underline">
+              Contacted Tutors
+            </Link>{" "}
+            and their profile shows the signed date.
+          </p>
+          <p className="mt-0.5 truncate font-mono text-[13px] text-muted-foreground">{agreementLink}</p>
+        </div>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <Button asChild variant="secondary">
+            <a href="/agreement" target="_blank" rel="noopener">
+              <ExternalLink aria-hidden /> View
+            </a>
+          </Button>
+          <CopyLinkButton url={agreementLink} variant="soft" label="Copy Agreement Link" copiedToast="Agreement link copied" />
+        </div>
       </Card>
 
       <Card className="mt-4 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">

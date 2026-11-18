@@ -244,10 +244,13 @@ html, body { overflow-x: clip; }
   .sf-spin { animation-duration: 2.4s; }
 }
 
-/* Company logo row (Asva Innovation Lab) */
-.st-footer .st-company { justify-content: flex-start; align-items: center; padding-block: var(--st-space-md); border-top: 1px solid var(--st-color-rule); }
-.st-company__logo { display: block; line-height: 0; }
-.st-company__logo img { width: 150px; height: auto; }
+/* Footer: ownership line (Asva Innovation Lab) and Facebook link */
+.st-owner { display: grid; gap: var(--st-space-xs); }
+.st-owner p { margin: 0; }
+.st-footer a.st-owner__link { display: inline-flex; align-items: center; gap: var(--st-space-sm); color: var(--st-color-ink-2); text-decoration: none; }
+.st-footer a.st-owner__link:hover span { text-decoration: underline; text-decoration-color: var(--st-color-accent); }
+.st-owner__link strong { color: var(--st-color-ink); font-weight: 600; }
+.st-footer .st-owner__logo { width: 96px; height: auto; flex-shrink: 0; }
 .st-footer a.st-fb { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; }
 .st-footer a.st-fb svg { width: 18px; height: 18px; color: #1877f2; }
 

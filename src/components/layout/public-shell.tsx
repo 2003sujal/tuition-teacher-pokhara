@@ -29,9 +29,17 @@ export function PublicShell({ settings, children }: { settings: AgencySettings; 
 
       <footer className="st-footer">
         <div className="st-container">
-          <p>
-            © {year} {settings.agencyName}
-          </p>
+          <div className="st-owner">
+            <p>
+              © {year} {settings.agencyName}
+            </p>
+            <a href={COMPANY.website} target="_blank" rel="noopener" className="st-owner__link">
+              <Image src={COMPANY.logo} alt="Asva" width={2170} height={725} sizes="96px" className="st-owner__logo" />
+              <span>
+                {settings.agencyName} is a service of <strong>{COMPANY.name}</strong>
+              </span>
+            </a>
+          </div>
           <ul>
             {settings.contactNumber && (
               <li>
@@ -58,12 +66,6 @@ export function PublicShell({ settings, children }: { settings: AgencySettings; 
               </a>
             </li>
           </ul>
-        </div>
-
-        <div className="st-container st-company">
-          <a className="st-company__logo" href={COMPANY.website} target="_blank" rel="noopener" title={COMPANY.name}>
-            <Image src={COMPANY.logo} alt={COMPANY.name} width={2170} height={725} sizes="150px" />
-          </a>
         </div>
       </footer>
     </div>
