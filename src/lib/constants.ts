@@ -73,6 +73,7 @@ export const POSTER_ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp"];
 /** Live site: the registration link the admin copies always points here. */
 export const PUBLIC_SITE_URL = "https://tuition-teacher-pokhara.vercel.app";
 export const FACEBOOK_URL = "https://www.facebook.com/tuitionteacherpokhara/";
+export const TIKTOK_URL = "https://www.tiktok.com/@tutionteacherpokhara";
 
 export const COMPANY = {
   name: "Asva Innovation Lab Pvt. Ltd.",

@@ -244,20 +244,21 @@ html, body { overflow-x: clip; }
   .sf-spin { animation-duration: 2.4s; }
 }
 
-/* Footer: ownership line (Asva Innovation Lab) and Facebook link */
+/* Footer: ownership line (Asva Innovation Lab) */
 .st-owner { display: grid; gap: var(--st-space-xs); }
 .st-owner p { margin: 0; }
 .st-footer a.st-owner__link { display: inline-flex; align-items: center; gap: var(--st-space-sm); color: var(--st-color-ink-2); text-decoration: none; }
 .st-footer a.st-owner__link:hover span { text-decoration: underline; text-decoration-color: var(--st-color-accent); }
 .st-owner__link strong { color: var(--st-color-ink); font-weight: 600; }
 .st-footer .st-owner__logo { width: 96px; height: auto; flex-shrink: 0; }
-.st-footer a.st-fb { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; }
-.st-footer a.st-fb svg { width: 18px; height: 18px; color: #1877f2; }
 
 /* Facebook follow call-out */
 .st-follow { display: flex; align-items: center; gap: var(--st-space-sm); padding: var(--st-space-sm) var(--st-space-md); border: 1px solid var(--st-color-rule); border-radius: var(--st-radius-control); background: var(--st-color-paper-hi); color: var(--st-color-ink); text-decoration: none; max-width: 30rem; transition: border-color .15s, background .15s; }
-.st-follow:hover { border-color: #1877f2; background: color-mix(in oklab, #1877f2 6%, var(--st-color-paper-hi)); }
+.st-follow--facebook:hover { border-color: #1877f2; background: color-mix(in oklab, #1877f2 6%, var(--st-color-paper-hi)); }
+.st-follow--tiktok:hover { border-color: #111; background: color-mix(in oklab, #fe2c55 5%, var(--st-color-paper-hi)); }
+.st-social { display: grid; gap: var(--st-space-xs); width: 100%; max-width: 30rem; }
 .st-follow__icon { display: grid; place-items: center; width: 40px; height: 40px; flex-shrink: 0; border-radius: 999px; background: #1877f2; color: #fff; }
+.st-follow--tiktok .st-follow__icon { background: #111; color: #fff; box-shadow: -2px -2px 0 #25f4ee inset, 2px 2px 0 #fe2c55 inset; }
 .st-follow__icon svg { width: 22px; height: 22px; }
 .st-follow__text { display: grid; gap: 2px; font-size: var(--st-text-small); color: var(--st-color-ink-2); }
 .st-follow__text strong { font-size: var(--st-text-body, 1rem); color: var(--st-color-ink); font-weight: 600; }

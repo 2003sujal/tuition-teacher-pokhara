@@ -134,10 +134,44 @@ function finish({ tutorSet, ...t }: ReturnType<typeof emptyTotals>): Totals {
   return { ...t, tutors: tutorSet.size };
 }
 
-export async function getRevenueReport(period: RevenuePeriod) {
+async function loadAllHires() {
   await connectDB();
   // Placements number in the hundreds or low thousands, so aggregate in memory.
-  const all = (await Hire.find().select(FIELDS).sort({ hiredAt: -1, createdAt: -1 }).limit(20000).lean<LeanHire[]>()).map(toRow);
+  return (await Hire.find().select(FIELDS).sort({ hiredAt: -1, createdAt: -1 }).limit(20000).lean<LeanHire[]>()).map(toRow);
+}
+
+/** One calendar year (Nepal time): totals plus Jan–Dec. */
+export type YearSummary = { year: string; totals: Totals; months: Totals[] };
+
+/** Every year with records, newest first, each with a 12-month breakdown. */
+export function summariseYears(all: HireRow[]): YearSummary[] {
+  const years = new Map<string, { totals: ReturnType<typeof emptyTotals>; months: ReturnType<typeof emptyTotals>[] }>();
+  for (const h of all) {
+    const p = nepalParts(new Date(h.hiredAt));
+    const key = String(p.y);
+    if (!years.has(key)) years.set(key, { totals: emptyTotals(), months: Array.from({ length: 12 }, emptyTotals) });
+    const y = years.get(key)!;
+    add(y.totals, h);
+    add(y.months[p.m]!, h);
+  }
+  return [...years.entries()]
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([year, y]) => ({ year, totals: finish(y.totals), months: y.months.map(finish) }));
+}
+
+export async function getYearSummaries() {
+  return summariseYears(await loadAllHires());
+}
+
+/** The current year in Nepal time, e.g. "2026". */
+export function currentNepalYear(now = new Date()) {
+  return String(nepalParts(now).y);
+}
+
+export const MONTH_LABELS = MONTHS;
+
+export async function getRevenueReport(period: RevenuePeriod) {
+  const all = await loadAllHires();
 
   const now = new Date();
   const starts = {
@@ -210,5 +244,6 @@ export async function getRevenueReport(period: RevenuePeriod) {
       .map(([key, t]): BreakdownRow => ({ key, label: key, ...finish(t) })),
     hires: hires.slice(0, 200),
     hireCount: hires.length,
+    years: summariseYears(all),
   };
 }

@@ -1,8 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Briefcase, Presentation } from "lucide-react";
+import { Briefcase, Download, Presentation } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
-import { getRevenueReport, REVENUE_PERIODS, type BreakdownRow, type RevenuePeriod, type Totals } from "@/lib/data/hires";
+import {
+  currentNepalYear,
+  getRevenueReport,
+  REVENUE_PERIODS,
+  type BreakdownRow,
+  type RevenuePeriod,
+  type Totals,
+} from "@/lib/data/hires";
+import { listSnapshots, saveFinishedYears } from "@/lib/data/revenue-snapshots";
+import { Button } from "@/components/ui/button";
+import { SaveSnapshotButton } from "@/components/dashboard/save-snapshot";
+import { MonthComparison, SnapshotHistory, YearComparison } from "@/components/dashboard/revenue-compare";
 import { cn, formatDate, formatNpr } from "@/lib/utils";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -118,11 +129,36 @@ export default async function RevenuePage({ searchParams }: PageProps<"/admin/re
   const report = await getRevenueReport(period);
   const selected = report.summary[period];
 
+  // Keep a permanent copy of every finished year (runs once per year), then load history.
+  await saveFinishedYears(report.years).catch((err) => console.error("Year-end snapshot failed", err));
+  const snapshots = await listSnapshots();
+  const thisYear = currentNepalYear();
+  const lastYear = String(Number(thisYear) - 1);
+  const thisSummary = report.years.find((y) => y.year === thisYear) ?? null;
+  const lastSummary =
+    report.years.find((y) => y.year === lastYear) ??
+    (() => {
+      // Fall back to the saved copy if last year's records are gone.
+      const s = snapshots.find((x) => x.year === lastYear && x.kind === "final") ?? snapshots.find((x) => x.year === lastYear);
+      return s && s.months.length === 12 ? { year: s.year, totals: s.totals, months: s.months } : null;
+    })();
+  const snapshotYears = report.years.map((y) => y.year);
+
   return (
     <>
       <PageHeader
         title="Revenue"
         description="Teachers hired, salary, our commission and demo deposits — by week, month and year (Nepal time)."
+        actions={
+          <>
+            <Button asChild variant="secondary">
+              <a href="/api/revenue/export" download>
+                <Download aria-hidden /> Export CSV
+              </a>
+            </Button>
+            <SaveSnapshotButton years={snapshotYears} defaultYear={snapshotYears.includes(thisYear) ? thisYear : (snapshotYears[0] ?? thisYear)} />
+          </>
+        }
       />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
@@ -254,6 +290,51 @@ export default async function RevenuePage({ searchParams }: PageProps<"/admin/re
           </CardHeader>
           <CardContent>
             <BreakdownTable rows={report.yearly} first="Year" />
+          </CardContent>
+        </Card>
+      </div>
+
+      <h2 className="mt-10 text-lg font-semibold tracking-tight">Compare years</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Each finished year is saved automatically at year end; save the current year any time with Save snapshot.
+        Saved copies don&apos;t change if records are edited or deleted later.
+      </p>
+
+      <Card className="mt-4">
+        <CardHeader>
+          <div>
+            <CardTitle>Year-over-year</CardTitle>
+            <CardDescription>Live figures per year, growth vs the previous year, and the saved copy</CardDescription>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <YearComparison years={report.years} snapshots={snapshots} />
+        </CardContent>
+      </Card>
+
+      <div className="mt-6 grid gap-6 xl:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <div>
+              <CardTitle>
+                Month by month · {thisYear} vs {lastYear}
+              </CardTitle>
+              <CardDescription>Total collected (commission + demo deposits held)</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <MonthComparison thisYear={thisSummary} lastYear={lastSummary} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <div>
+              <CardTitle>Saved snapshots</CardTitle>
+              <CardDescription>Permanent copies of yearly revenue, newest first</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <SnapshotHistory snapshots={snapshots} />
           </CardContent>
         </Card>
       </div>

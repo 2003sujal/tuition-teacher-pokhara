@@ -2,8 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Phone, Mail, MapPin, Globe } from "lucide-react";
 import { BrandLogo } from "./brand";
-import { FacebookIcon } from "./social";
-import { COMPANY, FACEBOOK_URL, type AgencySettings } from "@/lib/constants";
+import { COMPANY, type AgencySettings } from "@/lib/constants";
 import "./public-studio.css";
 
 // The public pages share the website's Studio system (scoped to .studio).
@@ -59,12 +58,6 @@ export function PublicShell({ settings, children }: { settings: AgencySettings; 
                 {settings.address}
               </li>
             )}
-            <li>
-              <a className="st-fb" href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer">
-                Follow us on Facebook
-                <FacebookIcon />
-              </a>
-            </li>
           </ul>
         </div>
       </footer>
