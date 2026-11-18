@@ -29,10 +29,10 @@ export type AgreementContent = {
 
 /** The four statements the tutor ticks before signing. */
 export const AGREEMENT_STATEMENTS = [
-  "Yes, I understand and accept the service charges in Clause 2.",
+  "Yes, I understand and accept the service charges and payment terms in Clause 2 (half within 7 days of selection, the rest within 1 month after my first salary).",
   "Yes, I understand and accept the demo class policy in Clause 3, including the deposit.",
   "Yes, I will keep this agreement confidential and will not discuss it with parents or students.",
-  "I have read this agreement in full, I understand it, and I agree to follow it.",
+  "I have read this agreement in full, I understand it, and I agree to follow it. The citizenship certificate I attach is my own and genuine.",
 ] as const;
 
 const rs = (n: number) => `Rs. ${n.toLocaleString("en-IN")}`;
@@ -97,6 +97,19 @@ export function buildAgreement({ agencyName, date }: { agencyName: string; date:
             rows: COMMISSION_TIERS.map((t) => [t.label, t.charge] as [string, string]),
           },
           { type: "note", text: "Example: for a salary of Rs. 12,000 per month, the service charge is 30% = Rs. 3,600, paid once." },
+          { type: "p", text: "**Payment of the service charge.** Once the Tutor is selected:" },
+          {
+            type: "ol",
+            style: "alpha",
+            items: [
+              "**Half (50%)** of the service charge is paid to the Agency **within 7 days of the selection date**; and",
+              "the **remaining half** is paid **within 1 month after the Tutor receives the first month’s salary**.",
+            ],
+          },
+          {
+            type: "note",
+            text: "Example: for a service charge of Rs. 3,600, Rs. 1,800 is paid within 7 days of selection and Rs. 1,800 within 1 month after the first salary is received.",
+          },
         ],
       },
       {
@@ -131,6 +144,10 @@ export function buildAgreement({ agencyName, date }: { agencyName: string; date:
           {
             type: "p",
             text: `The Tutor accepts this agreement electronically below. The Agency records the Tutor’s name, registered mobile number and the date of acceptance (version ${AGREEMENT_VERSION}).`,
+          },
+          {
+            type: "p",
+            text: "As proof of identity, the Tutor attaches a copy of their **citizenship certificate** (JPG, PNG or PDF). The copy forms part of this agreement, is stored privately, and is used only to verify the Tutor’s identity.",
           },
         ],
       },

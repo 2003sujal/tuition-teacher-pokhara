@@ -21,6 +21,7 @@ export type SignedAgreementDetail = SignedAgreementRow & {
   contentHash: string;
   ipAddress: string;
   userAgent: string;
+  citizenship: { fileName: string; fileType: string; fileSize: number; sha256: string } | null;
   /** True when the stored hash still matches the stored record. */
   intact: boolean;
 };
@@ -63,10 +64,29 @@ export async function getTutorAgreements(tutorId: string) {
   return rows.map(toRow);
 }
 
+/** Private file id of the attached citizenship certificate (server use only). */
+export async function getCitizenshipPublicId(id: string) {
+  await connectDB();
+  const a = await SignedAgreement.findById(id).select("citizenshipPublicId").lean<{ citizenshipPublicId?: string } | null>();
+  return a?.citizenshipPublicId || null;
+}
+
 export async function getSignedAgreement(id: string): Promise<SignedAgreementDetail | null> {
   await connectDB();
   const a = await SignedAgreement.findById(id).lean<
-    (Lean & { content: AgreementContent; contentText: string; contentHash: string; ipAddress?: string; userAgent?: string }) | null
+    (Lean & {
+        content: AgreementContent;
+        contentText: string;
+        contentHash: string;
+        ipAddress?: string;
+        userAgent?: string;
+        citizenshipPublicId?: string;
+        citizenshipFileName?: string;
+        citizenshipFileType?: string;
+        citizenshipFileSize?: number;
+        citizenshipSha256?: string;
+      })
+    | null
   >();
   if (!a) return null;
   const row = toRow(a);
@@ -77,6 +97,14 @@ export async function getSignedAgreement(id: string): Promise<SignedAgreementDet
     contentHash: a.contentHash,
     ipAddress: a.ipAddress ?? "",
     userAgent: a.userAgent ?? "",
+    citizenship: a.citizenshipPublicId
+      ? {
+          fileName: a.citizenshipFileName ?? "",
+          fileType: a.citizenshipFileType ?? "",
+          fileSize: a.citizenshipFileSize ?? 0,
+          sha256: a.citizenshipSha256 ?? "",
+        }
+      : null,
     intact:
       hashAgreement({
         refNo: a.refNo,
@@ -85,6 +113,7 @@ export async function getSignedAgreement(id: string): Promise<SignedAgreementDet
         acceptedAt: a.acceptedAt,
         version: a.version,
         contentText: a.contentText,
+        citizenshipSha256: a.citizenshipSha256,
       }) === a.contentHash,
   };
 }

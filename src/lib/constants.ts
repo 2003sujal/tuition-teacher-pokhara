@@ -87,7 +87,17 @@ export const COMPANY = {
 // ---- Tutor service agreement ---------------------------------------------
 
 /** Bump when the agreement wording changes; stored with each acceptance. */
-export const AGREEMENT_VERSION = "2026-11";
+export const AGREEMENT_VERSION = "2026-11.2";
+
+/** Citizenship certificate attached when signing (kept private, like CVs). */
+export const CITIZENSHIP_ALLOWED: Record<string, string> = {
+  pdf: "application/pdf",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+};
+export const CITIZENSHIP_MAX_BYTES = 4 * 1024 * 1024;
+export const CITIZENSHIP_ACCEPT_ATTR = ".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png";
 
 /** Service charge on the tutor's first month salary (NPR). */
 export const COMMISSION_TIERS = [

@@ -191,6 +191,20 @@
 .ag__accepted span { color: var(--st-color-safe); font-size: 1.1em; line-height: 1.5; }
 .ag__evidence { margin: var(--st-space-lg) 0 0; padding-top: var(--st-space-sm); border-top: 1px dashed var(--st-color-rule); font-family: var(--st-font-body); font-size: 12px; color: var(--st-color-muted); text-align: center; overflow-wrap: anywhere; }
 
+.ag__annex { break-before: page; }
+.ag__annex-img { display: block; max-width: 100%; max-height: 900px; margin: var(--st-space-sm) auto; border: 1px solid var(--st-color-rule); }
+.ag__upload { display: grid; gap: var(--st-space-xs); }
+.ag__file { display: flex; align-items: center; gap: var(--st-space-sm); padding: var(--st-space-sm); border: 1px solid var(--st-color-field-edge); border-radius: var(--st-radius-control); background: var(--st-color-paper-hi); }
+.ag__file img { width: 56px; height: 56px; object-fit: cover; flex-shrink: 0; outline: 1px solid var(--st-color-rule); }
+.ag__file-icon { display: grid; place-items: center; width: 56px; height: 56px; flex-shrink: 0; background: var(--st-color-paper-2); color: var(--st-color-ink-2); }
+.ag__file-meta { flex: 1; min-width: 0; font-size: var(--st-text-small); }
+.ag__file-meta strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.ag__file button { flex-shrink: 0; padding: 6px 10px; border: 1px solid var(--st-color-rule); background: transparent; color: var(--st-color-ink-2); font: inherit; font-size: var(--st-text-small); cursor: pointer; }
+.ag__pick { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: var(--st-space-lg) var(--st-space-md); border: 1.5px dashed var(--st-color-field-edge); border-radius: var(--st-radius-control); background: var(--st-color-paper-hi); text-align: center; cursor: pointer; }
+.ag__pick:hover { border-color: var(--st-color-ink-2); background: var(--st-color-accent-wash); }
+.ag__pick.is-invalid { border-color: var(--st-color-error); }
+.ag__pick svg { width: 26px; height: 26px; color: var(--st-color-ink-2); }
+.ag__pick small { color: var(--st-color-muted); font-size: var(--st-text-small); }
 @media (max-width: 40rem) {
   .ag { padding-top: var(--st-space-md); }
   .ag__paper { font-size: 1rem; }

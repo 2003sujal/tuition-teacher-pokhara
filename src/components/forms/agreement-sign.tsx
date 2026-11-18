@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
-import { CircleCheck, Loader2, Printer } from "lucide-react";
+import { CircleCheck, FileText, IdCard, Loader2, Printer } from "lucide-react";
+import { CITIZENSHIP_ACCEPT_ATTR, CITIZENSHIP_ALLOWED, CITIZENSHIP_MAX_BYTES } from "@/lib/constants";
+import { compressImage } from "@/lib/compress-image";
+import { formatBytes } from "@/lib/utils";
 import { AgreementSignatures } from "@/components/agreement/agreement-document";
 
 // API field for each statement, in the order of AGREEMENT_STATEMENTS.
@@ -35,20 +38,63 @@ export function AgreementSign({
   const [submitting, setSubmitting] = useState(false);
   const [signed, setSigned] = useState<{ name: string; at: string; refNo: string } | null>(null);
 
+  const [doc, setDoc] = useState<File | null>(null);
+  const [docPreview, setDocPreview] = useState("");
+  const [preparing, setPreparing] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
   const allChecked = CHECKS.every((c) => checks[c.name]);
+  const ready = allChecked && !!doc;
+
+  async function pickDoc(picked: File | undefined) {
+    if (!picked) return;
+    const ext = (/\.([a-z0-9]+)$/i.exec(picked.name)?.[1] ?? "").toLowerCase();
+    if (!CITIZENSHIP_ALLOWED[ext]) {
+      setErrors((e) => ({ ...e, citizenship: "Choose a JPG, PNG or PDF file" }));
+      return;
+    }
+    setPreparing(true);
+    // Shrink phone photos so they upload quickly and stay under the limit.
+    const file = ext === "pdf" ? picked : await compressImage(picked);
+    setPreparing(false);
+    if (file.size > CITIZENSHIP_MAX_BYTES) {
+      setErrors((e) => ({ ...e, citizenship: "File must be 4 MB or smaller" }));
+      return;
+    }
+    setErrors((e) => {
+      const next = { ...e };
+      delete next.citizenship;
+      return next;
+    });
+    if (docPreview) URL.revokeObjectURL(docPreview);
+    setDoc(file);
+    setDocPreview(file.type.startsWith("image/") ? URL.createObjectURL(file) : "");
+  }
+
+  function clearDoc() {
+    if (docPreview) URL.revokeObjectURL(docPreview);
+    setDoc(null);
+    setDocPreview("");
+    if (fileRef.current) fileRef.current.value = "";
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!doc) {
+      setErrors((x) => ({ ...x, citizenship: "Attach a photo or PDF of your citizenship certificate" }));
+      return;
+    }
     setErrors({});
     setFormError("");
     setNotRegistered(false);
     setSubmitting(true);
     try {
-      const res = await fetch("/api/agreement", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fullName, mobileNumber: mobile, ...checks }),
-      });
+      const body = new FormData();
+      body.set("fullName", fullName);
+      body.set("mobileNumber", mobile);
+      for (const name of CHECK_NAMES) body.set(name, String(checks[name]));
+      body.set("citizenship", doc);
+      const res = await fetch("/api/agreement", { method: "POST", body });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         if (data.fields) setErrors(data.fields);
@@ -141,6 +187,47 @@ export function AgreementSign({
             </div>
           </div>
 
+          <div className="ag__upload">
+            <label className="sf-label" htmlFor="ag-citizenship">
+              Citizenship certificate <span className="sf-req">*</span>
+            </label>
+            {doc ? (
+              <div className="ag__file">
+                {docPreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- local preview of the chosen file
+                  <img src={docPreview} alt="Selected citizenship certificate" />
+                ) : (
+                  <span className="ag__file-icon">
+                    <FileText aria-hidden />
+                  </span>
+                )}
+                <span className="ag__file-meta">
+                  <strong>{doc.name}</strong>
+                  {formatBytes(doc.size)}
+                </span>
+                <button type="button" onClick={clearDoc}>
+                  Change
+                </button>
+              </div>
+            ) : (
+              <label htmlFor="ag-citizenship" className={`ag__pick ${errors.citizenship ? "is-invalid" : ""}`}>
+                {preparing ? <Loader2 className="sf-spin" aria-hidden /> : <IdCard aria-hidden />}
+                <span>{preparing ? "Preparing photo…" : "Tap to attach a photo or PDF"}</span>
+                <small>Front and back if possible · JPG, PNG or PDF · up to 4 MB</small>
+              </label>
+            )}
+            <input
+              ref={fileRef}
+              id="ag-citizenship"
+              type="file"
+              accept={CITIZENSHIP_ACCEPT_ATTR}
+              className="sr-only"
+              onChange={(e) => pickDoc(e.target.files?.[0])}
+            />
+            <p className="sf-hint">Kept private. Used only to verify your identity for this agreement.</p>
+            <p className="sf-error">{errors.citizenship}</p>
+          </div>
+
           <fieldset className="ag__checks">
             <legend className="sf-label">Please confirm each statement</legend>
             {CHECKS.map((c) => (
@@ -166,11 +253,19 @@ export function AgreementSign({
             </p>
           )}
 
-          <button type="submit" className="sf-btn sf-btn--primary sf-submit" disabled={!allChecked || submitting} aria-busy={submitting}>
+          <button type="submit" className="sf-btn sf-btn--primary sf-submit" disabled={!ready || submitting || preparing} aria-busy={submitting}>
             {submitting && <Loader2 className="sf-spin" aria-hidden />}
-            {submitting ? "Submitting…" : "I Agree & Sign"}
+            {submitting ? "Uploading & signing…" : "I Agree & Sign"}
           </button>
-          {!allChecked && <p className="sf-hint">Tick all four statements to sign.</p>}
+          {!ready && (
+            <p className="sf-hint">
+              {!doc && !allChecked
+                ? "Attach your citizenship certificate and tick all four statements to sign."
+                : !doc
+                  ? "Attach your citizenship certificate to sign."
+                  : "Tick all four statements to sign."}
+            </p>
+          )}
         </form>
       )}
     </>

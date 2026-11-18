@@ -26,6 +26,8 @@ export async function GET(req: Request, ctx: RouteContext<"/api/agreements/[id]/
     `Version          : ${a.version}`,
     `IP address       : ${a.ipAddress || "-"}`,
     `Device / browser : ${a.userAgent || "-"}`,
+    `Citizenship file : ${a.citizenship ? `${a.citizenship.fileName} (${a.citizenship.fileType}, ${a.citizenship.fileSize} bytes)` : "not attached"}`,
+    ...(a.citizenship?.sha256 ? [`Citizenship SHA-256: ${a.citizenship.sha256}`] : []),
     `SHA-256          : ${a.contentHash}`,
     `Integrity        : ${a.intact ? "verified (record unchanged since signing)" : "MISMATCH - record differs from its hash"}`,
     "",

@@ -8,7 +8,14 @@ type Hashable = {
   acceptedAt: Date | string;
   version: string;
   contentText: string;
+  /** SHA-256 of the attached citizenship file (records from before attachments have none). */
+  citizenshipSha256?: string;
 };
+
+/** SHA-256 of raw bytes, hex. */
+export function sha256(bytes: Uint8Array) {
+  return createHash("sha256").update(bytes).digest("hex");
+}
 
 /**
  * SHA-256 over everything that matters in a signed agreement. Recomputing it
@@ -22,6 +29,8 @@ export function hashAgreement(r: Hashable) {
     new Date(r.acceptedAt).toISOString(),
     r.version,
     r.contentText,
+    // Appended only when present, so hashes of earlier records stay valid.
+    ...(r.citizenshipSha256 ? [`citizenship:${r.citizenshipSha256}`] : []),
   ].join("\n--\n");
   return createHash("sha256").update(payload, "utf8").digest("hex");
 }

@@ -60,6 +60,23 @@ export async function uploadCv(buffer: Buffer, opts: { extension: string }) {
   return { publicId: result.public_id, url, bytes: result.bytes };
 }
 
+/**
+ * Citizenship certificates attached to signed agreements: private
+ * ("authenticated") raw assets, exactly like CVs. View them through
+ * signedCvUrl(), which works for any private raw asset.
+ */
+export async function uploadCitizenship(buffer: Buffer, opts: { extension: string }) {
+  const result = await uploadBuffer(buffer, {
+    resource_type: "raw",
+    type: "authenticated",
+    folder: "tuition-teacher-pokhara/citizenship",
+    public_id: `citizenship-${Date.now()}-${randomUUID().slice(0, 8)}.${opts.extension}`,
+    overwrite: false,
+    use_filename: false,
+  });
+  return { publicId: result.public_id, bytes: result.bytes };
+}
+
 export async function deleteCv(publicId: string) {
   await client().uploader.destroy(publicId, { resource_type: "raw", type: "authenticated", invalidate: true });
 }

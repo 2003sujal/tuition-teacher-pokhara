@@ -21,6 +21,13 @@ const SignedAgreementSchema = new Schema(
     content: { type: Schema.Types.Mixed, required: true },
     contentText: { type: String, required: true },
     contentHash: { type: String, required: true },
+    // Citizenship certificate attached as proof of identity (private file).
+    citizenshipPublicId: { type: String, default: "" },
+    citizenshipFileName: { type: String, default: "", maxlength: 200 },
+    citizenshipFileType: { type: String, default: "" },
+    citizenshipFileSize: { type: Number, default: 0 },
+    // SHA-256 of the file bytes, covered by contentHash.
+    citizenshipSha256: { type: String, default: "" },
     // Technical evidence of the electronic acceptance.
     ipAddress: { type: String, default: "" },
     userAgent: { type: String, default: "", maxlength: 500 },

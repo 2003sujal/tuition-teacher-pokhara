@@ -7,7 +7,7 @@ import { isObjectId } from "@/lib/api";
 import { getSignedAgreement } from "@/lib/data/agreements";
 import { getSettings } from "@/lib/data/settings";
 import { formatMobile } from "@/lib/phone";
-import { cn, formatDateTime } from "@/lib/utils";
+import { cn, formatBytes, formatDateTime } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AgreementDocument, AgreementSignatures } from "@/components/agreement/agreement-document";
@@ -41,6 +41,7 @@ export default async function SignedAgreementPage({ params }: PageProps<"/admin/
     second: "2-digit",
     timeZone: "Asia/Kathmandu",
   }).format(new Date(a.acceptedAt));
+  const citizenshipUrl = `/api/agreements/${a.id}/citizenship`;
 
   return (
     <>
@@ -85,7 +86,25 @@ export default async function SignedAgreementPage({ params }: PageProps<"/admin/
             <Row label="Agreement version">{a.version}</Row>
             <Row label="IP address" mono>{a.ipAddress || "—"}</Row>
             <Row label="Device / browser" mono>{a.userAgent || "—"}</Row>
-            <Row label="SHA-256 hash" mono>{a.contentHash}</Row>
+            <Row label="Citizenship certificate">
+              {a.citizenship ? (
+                <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <span>
+                    {a.citizenship.fileName} · {formatBytes(a.citizenship.fileSize)}
+                  </span>
+                  <a href={citizenshipUrl} target="_blank" rel="noopener" className="text-primary hover:underline">
+                    View
+                  </a>
+                  <a href={`${citizenshipUrl}?download=1`} className="text-primary hover:underline">
+                    Download
+                  </a>
+                </span>
+              ) : (
+                <span className="font-normal text-muted-foreground">Not attached (signed before uploads were required)</span>
+              )}
+            </Row>
+            {a.citizenship?.sha256 && <Row label="Citizenship file SHA-256" mono>{a.citizenship.sha256}</Row>}
+            <Row label="Record SHA-256 hash" mono>{a.contentHash}</Row>
           </dl>
           <p className="mt-3 text-xs text-muted-foreground">
             This is the full document exactly as shown to the tutor when they signed. The hash covers the document text,
@@ -112,6 +131,25 @@ export default async function SignedAgreementPage({ params }: PageProps<"/admin/
             tutorName={a.signedName}
             tutorSub={`Accepted electronically ${formatDateTime(a.acceptedAt)}`}
           />
+          {a.citizenship && (
+            <section className="ag__section ag__annex">
+              <h2>Annex A — Citizenship certificate of the Tutor</h2>
+              {a.citizenship.fileType.startsWith("image/") ? (
+                // eslint-disable-next-line @next/next/no-img-element -- private file via short-lived signed redirect
+                <img src={citizenshipUrl} alt={`Citizenship certificate of ${a.signedName}`} className="ag__annex-img" />
+              ) : (
+                <p>
+                  Attached as a PDF file: <strong>{a.citizenship.fileName}</strong>.{" "}
+                  <a href={citizenshipUrl} target="_blank" rel="noopener" className="no-print">
+                    Open the PDF
+                  </a>
+                </p>
+              )}
+              <p className="ag__example">
+                File SHA-256: {a.citizenship.sha256 || "—"}
+              </p>
+            </section>
+          )}
           <p className="ag__evidence">
             Ref. No. {a.refNo} · Mobile +977 {formatMobile(a.mobileNumber)} · Version {a.version} · SHA-256{" "}
             {a.contentHash.slice(0, 16)}…
