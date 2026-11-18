@@ -4,6 +4,8 @@ import { Hire } from "@/models/Hire";
 
 export type HireRow = {
   id: string;
+  kind: "hire" | "demo";
+  refunded: boolean;
   tutorId: string;
   tutorName: string;
   vacancyTitle: string;
@@ -18,6 +20,8 @@ export type HireRow = {
 
 type LeanHire = {
   _id: unknown;
+  kind?: string;
+  refunded?: boolean;
   tutorId: unknown;
   tutorName: string;
   vacancyTitle: string;
@@ -33,6 +37,8 @@ type LeanHire = {
 function toRow(h: LeanHire): HireRow {
   return {
     id: String(h._id),
+    kind: h.kind === "demo" ? "demo" : "hire",
+    refunded: !!h.refunded,
     tutorId: String(h.tutorId),
     tutorName: h.tutorName,
     vacancyTitle: h.vacancyTitle,
@@ -46,7 +52,7 @@ function toRow(h: LeanHire): HireRow {
   };
 }
 
-const FIELDS = "tutorId tutorName vacancyTitle studentLocation monthlySalary commission hiredAt posterUrl note createdBy";
+const FIELDS = "kind refunded tutorId tutorName vacancyTitle studentLocation monthlySalary commission hiredAt posterUrl note createdBy";
 
 export async function getTutorHires(tutorId: string): Promise<HireRow[]> {
   await connectDB();
@@ -91,16 +97,37 @@ export function periodStart(period: RevenuePeriod, now = new Date()): Date | nul
   }
 }
 
-export type Totals = { hires: number; tutors: number; salary: number; commission: number };
+/**
+ * hires/salary/commission cover placements only. demos counts demo classes;
+ * deposits is demo deposits still held (not refunded). collected = commission + deposits.
+ */
+export type Totals = {
+  hires: number;
+  tutors: number;
+  salary: number;
+  commission: number;
+  demos: number;
+  deposits: number;
+  collected: number;
+};
 export type BreakdownRow = Totals & { key: string; label: string };
 
 function emptyTotals(): Totals & { tutorSet: Set<string> } {
-  return { hires: 0, tutors: 0, salary: 0, commission: 0, tutorSet: new Set() };
+  return { hires: 0, tutors: 0, salary: 0, commission: 0, demos: 0, deposits: 0, collected: 0, tutorSet: new Set() };
 }
 function add(t: ReturnType<typeof emptyTotals>, h: HireRow) {
+  if (h.kind === "demo") {
+    t.demos += 1;
+    if (!h.refunded) {
+      t.deposits += h.commission;
+      t.collected += h.commission;
+    }
+    return;
+  }
   t.hires += 1;
   t.salary += h.monthlySalary;
   t.commission += h.commission;
+  t.collected += h.commission;
   t.tutorSet.add(h.tutorId);
 }
 function finish({ tutorSet, ...t }: ReturnType<typeof emptyTotals>): Totals {

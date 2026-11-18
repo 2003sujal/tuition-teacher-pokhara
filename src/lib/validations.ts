@@ -86,15 +86,29 @@ const amount = (label: string, min: number) =>
     .min(min, min > 0 ? `Enter the ${label}` : `${label} cannot be negative`)
     .max(10_000_000, `${label} looks too large`);
 
-/** Text fields of a hire record (the poster image is validated separately). */
-export const hireSchema = z.object({
+const hireBase = {
   vacancyTitle: trimmed(2, 150, "Vacancy / job"),
   studentLocation: z.string().trim().max(120, "Location must be at most 120 characters").optional().default(""),
-  monthlySalary: amount("monthly salary", 1),
-  commission: amount("commission", 0),
-  hiredAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Choose the hire date"),
+  hiredAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Choose the date"),
   note: z.string().trim().max(1000, "Note must be at most 1000 characters").optional().default(""),
-});
+};
+
+/** Text fields of a hire or demo record (the poster image is validated separately). */
+export const hireSchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("hire"),
+    ...hireBase,
+    monthlySalary: amount("monthly salary", 1),
+    commission: amount("commission", 0),
+  }),
+  z.object({
+    kind: z.literal("demo"),
+    ...hireBase,
+    // Optional for a demo: blank or missing means not known yet (0).
+    monthlySalary: z.preprocess((v) => (v === undefined || v === null || v === "" ? 0 : v), amount("expected salary", 0)),
+    commission: amount("demo deposit", 0),
+  }),
+]);
 
 export type HireInput = z.infer<typeof hireSchema>;
 

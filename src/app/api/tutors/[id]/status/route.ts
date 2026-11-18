@@ -24,6 +24,15 @@ export async function PATCH(req: Request, ctx: RouteContext<"/api/tutors/[id]/st
   const previous = tutor.status;
   if (previous === parsed.data.status) return NextResponse.json({ ok: true, status: previous });
 
+  // Hired and Demo carry money (commission / demo deposit), so they must be set
+  // through POST /api/tutors/:id/hires with those details — never silently here.
+  if (parsed.data.status === "Hired" || parsed.data.status === "Demo") {
+    return jsonError(
+      `Add the ${parsed.data.status === "Hired" ? "salary and commission" : "demo deposit"} to mark this tutor as ${parsed.data.status}.`,
+      422
+    );
+  }
+
   tutor.status = parsed.data.status;
   tutor.archivedAt = parsed.data.status === "Archived" ? new Date() : undefined;
   await tutor.save();

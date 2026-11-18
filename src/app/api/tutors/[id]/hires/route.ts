@@ -38,6 +38,7 @@ export async function POST(req: Request, ctx: RouteContext<"/api/tutors/[id]/hir
     return typeof v === "string" ? v : undefined;
   };
   const parsed = hireSchema.safeParse({
+    kind: text("kind") === "demo" ? "demo" : "hire",
     vacancyTitle: text("vacancyTitle"),
     studentLocation: text("studentLocation"),
     monthlySalary: text("monthlySalary"),
@@ -72,7 +73,9 @@ export async function POST(req: Request, ctx: RouteContext<"/api/tutors/[id]/hir
   }
 
   const data = parsed.data;
+  const isDemo = data.kind === "demo";
   const hire = await Hire.create({
+    kind: data.kind,
     tutorId: tutor._id,
     tutorName: tutor.fullName,
     vacancyTitle: data.vacancyTitle,
@@ -86,11 +89,20 @@ export async function POST(req: Request, ctx: RouteContext<"/api/tutors/[id]/hir
     createdBy: admin.name,
   });
 
-  await logActivity({ tutorId: tutor._id, action: "hire_added", admin, newValue: data.vacancyTitle });
+  await logActivity({
+    tutorId: tutor._id,
+    action: "hire_added",
+    admin,
+    newValue: data.vacancyTitle,
+    note: isDemo ? "Demo class" : "",
+  });
 
+  // A hire marks the tutor Hired. A demo marks them Demo, unless they are
+  // already Hired elsewhere (a demo for a second tuition shouldn't undo that).
   const previous = tutor.status;
-  if (previous !== "Hired") {
-    tutor.status = "Hired";
+  const next = isDemo ? (previous === "Hired" ? previous : "Demo") : "Hired";
+  if (previous !== next) {
+    tutor.status = next;
     tutor.archivedAt = undefined;
     await tutor.save();
     await logActivity({
@@ -98,8 +110,8 @@ export async function POST(req: Request, ctx: RouteContext<"/api/tutors/[id]/hir
       action: "status_changed",
       admin,
       previousValue: previous ?? "",
-      newValue: "Hired",
-      note: `Hired for: ${data.vacancyTitle}`,
+      newValue: next,
+      note: `${isDemo ? "Demo class" : "Hired"} for: ${data.vacancyTitle}${data.note ? ` — ${data.note}` : ""}`,
     });
   }
 

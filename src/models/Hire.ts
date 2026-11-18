@@ -8,6 +8,12 @@ import { Schema, model, models, type InferSchemaType, type Model } from "mongoos
 const HireSchema = new Schema(
   {
     tutorId: { type: Schema.Types.ObjectId, ref: "Tutor", required: true },
+    // "hire": a placement (commission = our service charge).
+    // "demo": a demo class (commission = the tutor's refundable demo deposit,
+    //         monthlySalary = the expected salary, may be 0).
+    kind: { type: String, enum: ["hire", "demo"], default: "hire" },
+    refunded: { type: Boolean, default: false },
+    refundedAt: { type: Date },
     tutorName: { type: String, required: true, trim: true, maxlength: 100 },
     vacancyTitle: { type: String, required: true, trim: true, maxlength: 150 },
     studentLocation: { type: String, default: "", trim: true, maxlength: 120 },

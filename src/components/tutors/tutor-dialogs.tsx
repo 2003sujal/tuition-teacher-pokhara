@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Label, FieldError, Textarea } from "@/components/ui/input";
 import { StatusBadge } from "./status-badge";
 import { SubjectPicker } from "@/components/forms/subject-picker";
+import { RecordForm, type RecordKind } from "./hire-records";
 import { cn } from "@/lib/utils";
 
 export type DialogTutor = {
@@ -58,6 +59,9 @@ function StatusForm({ tutor, initial, onDone }: { tutor: DialogTutor; initial?: 
   const [status, setStatus] = useState<TutorStatus>(initial ?? tutor.status);
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
+  // Hired and Demo always ask for the money details (also when re-selecting
+  // the current status, e.g. a Hired tutor placed in a second tuition).
+  const recordKind: RecordKind | null = status === "Hired" ? "hire" : status === "Demo" ? "demo" : null;
 
   async function save() {
     setSaving(true);
@@ -99,26 +103,52 @@ function StatusForm({ tutor, initial, onDone }: { tutor: DialogTutor; initial?: 
           ))}
         </div>
       </fieldset>
-      <div className="mt-4 space-y-1.5">
-        <Label htmlFor="status-note">
-          Note <span className="font-normal text-muted-foreground">(optional)</span>
-        </Label>
-        <Textarea
-          id="status-note"
-          rows={3}
-          maxLength={1000}
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          placeholder="e.g. Called on 17 November, interested in Lakeside tuition"
-        />
-      </div>
+      {recordKind ? (
+        <div className="mt-4 border-t border-border pt-4">
+          <p className="mb-3 rounded-lg bg-primary-soft px-3 py-2 text-[13px] text-primary">
+            {recordKind === "hire"
+              ? "Enter the teacher's salary and our commission. They are added to Revenue."
+              : "Enter the demo class and the tutor's deposit. It is added to Revenue until refunded."}
+          </p>
+          {/* key: a fresh form when switching between Demo and Hired */}
+          <RecordForm
+            key={recordKind}
+            formId="status-record"
+            tutorId={tutor.id}
+            tutorName={tutor.fullName}
+            kind={recordKind}
+            onSaved={onDone}
+            onBusy={setSaving}
+          />
+        </div>
+      ) : (
+        <div className="mt-4 space-y-1.5">
+          <Label htmlFor="status-note">
+            Note <span className="font-normal text-muted-foreground">(optional)</span>
+          </Label>
+          <Textarea
+            id="status-note"
+            rows={3}
+            maxLength={1000}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="e.g. Called on 17 November, interested in Lakeside tuition"
+          />
+        </div>
+      )}
       <DialogFooter>
         <Button variant="secondary" onClick={onDone}>
           Cancel
         </Button>
-        <Button onClick={save} loading={saving} disabled={status === tutor.status}>
-          Save status
-        </Button>
+        {recordKind ? (
+          <Button type="submit" form="status-record" loading={saving}>
+            {recordKind === "hire" ? "Save hire & mark Hired" : "Save demo & mark Demo"}
+          </Button>
+        ) : (
+          <Button onClick={save} loading={saving} disabled={status === tutor.status}>
+            Save status
+          </Button>
+        )}
       </DialogFooter>
     </>
   );
