@@ -5,6 +5,8 @@ import { ArrowLeft, ExternalLink, Download, FileText, ImageIcon, BookOpen, Hash,
 import { requireAdmin } from "@/lib/auth";
 import { isObjectId } from "@/lib/api";
 import { getTutor, getTutorActivity } from "@/lib/data/tutors";
+import { getTutorHires } from "@/lib/data/hires";
+import { HireRecords } from "@/components/tutors/hire-records";
 import { formatMobile } from "@/lib/phone";
 import { formatBytes, formatDateTime, initials } from "@/lib/utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,7 +36,7 @@ export default async function TutorProfilePage({ params }: PageProps<"/admin/tut
   const { id } = await params;
   if (!isObjectId(id)) notFound();
 
-  const [tutor, activity] = await Promise.all([getTutor(id), getTutorActivity(id)]);
+  const [tutor, activity, hires] = await Promise.all([getTutor(id), getTutorActivity(id), getTutorHires(id)]);
   if (!tutor) notFound();
 
   const isPdf = tutor.cvFileType === "application/pdf";
@@ -165,6 +167,18 @@ export default async function TutorProfilePage({ params }: PageProps<"/admin/tut
         </div>
 
         <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div>
+                <CardTitle>Hire records</CardTitle>
+                <CardDescription>Vacancy posters, salary and our commission for each placement.</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <HireRecords tutorId={tutor.id} tutorName={tutor.fullName} hires={hires} />
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <div>

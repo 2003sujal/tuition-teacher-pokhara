@@ -10,6 +10,8 @@ import {
   UserCheck,
   PhoneOutgoing,
   BadgeCheck,
+  Presentation,
+  Wallet,
   Archive,
   BarChart3,
   Settings,
@@ -67,6 +69,7 @@ const NAV: { heading?: string; items: NavItem[] }[] = [
     items: [
       { label: "Available Tutors", href: "/admin/tutors?status=Available", icon: UserCheck, match: (p, s) => p === "/admin/tutors" && s === "Available" },
       { label: "Contacted Tutors", href: "/admin/tutors?status=Contacted", icon: PhoneOutgoing, match: (p, s) => p === "/admin/tutors" && s === "Contacted" },
+      { label: "Demo Tutors", href: "/admin/tutors?status=Demo", icon: Presentation, match: (p, s) => p === "/admin/tutors" && s === "Demo" },
       { label: "Hired Tutors", href: "/admin/tutors?status=Hired", icon: BadgeCheck, match: (p, s) => p === "/admin/tutors" && s === "Hired" },
       { label: "Archived Tutors", href: "/admin/tutors?status=Archived", icon: Archive, match: (p, s) => p === "/admin/tutors" && s === "Archived" },
     ],
@@ -74,6 +77,7 @@ const NAV: { heading?: string; items: NavItem[] }[] = [
   {
     heading: "Insights",
     items: [
+      { label: "Revenue", href: "/admin/revenue", icon: Wallet, match: (p) => p === "/admin/revenue" },
       { label: "Reports & Analytics", href: "/admin/reports", icon: BarChart3, match: (p) => p === "/admin/reports" },
       { label: "Settings", href: "/admin/settings", icon: Settings, match: (p) => p === "/admin/settings" },
     ],
@@ -85,6 +89,7 @@ const CRUMB_LABELS: Record<string, string> = {
   tutors: "Tutors",
   applications: "New Applications",
   reports: "Reports & Analytics",
+  revenue: "Revenue",
   settings: "Settings",
 };
 

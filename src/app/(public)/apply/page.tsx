@@ -3,6 +3,7 @@ import { CircleCheck } from "lucide-react";
 import { getSettings } from "@/lib/data/settings";
 import { PublicShell } from "@/components/layout/public-shell";
 import { ApplyForm } from "@/components/forms/apply-form";
+import { FacebookFollow } from "@/components/layout/social";
 
 export const metadata: Metadata = {
   title: "Register as a Tutor",
@@ -32,6 +33,7 @@ export default async function ApplyPage() {
               <CircleCheck aria-hidden />
               Now accepting tutors across Pokhara
             </p>
+            <FacebookFollow />
           </section>
 
           <section className="ap__sheet" aria-label="Tutor registration form">

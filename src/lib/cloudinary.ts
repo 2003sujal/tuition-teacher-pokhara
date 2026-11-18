@@ -74,6 +74,21 @@ export function signedCvUrl(publicId: string, opts: { attachment: boolean }) {
   });
 }
 
+/** Vacancy posters on hire records (public images, like the posters themselves). */
+export async function uploadPoster(buffer: Buffer) {
+  const result = await uploadBuffer(buffer, {
+    resource_type: "image",
+    folder: "tuition-teacher-pokhara/hire-posters",
+    public_id: `poster-${Date.now()}-${randomUUID().slice(0, 8)}`,
+    overwrite: false,
+  });
+  return { url: result.secure_url, publicId: result.public_id };
+}
+
+export async function deletePoster(publicId: string) {
+  await client().uploader.destroy(publicId, { resource_type: "image", invalidate: true });
+}
+
 /** Agency logos are public brand assets. */
 export async function uploadLogo(buffer: Buffer) {
   const result = await uploadBuffer(buffer, {

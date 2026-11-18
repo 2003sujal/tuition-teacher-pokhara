@@ -5,6 +5,7 @@ const STYLES: Record<TutorStatus, { dot: string; badge: string }> = {
   New: { dot: "bg-blue-600", badge: "bg-blue-50 text-blue-800 ring-blue-200" },
   Available: { dot: "bg-emerald-600", badge: "bg-emerald-50 text-emerald-800 ring-emerald-200" },
   Contacted: { dot: "bg-amber-500", badge: "bg-amber-50 text-amber-800 ring-amber-200" },
+  Demo: { dot: "bg-cyan-600", badge: "bg-cyan-50 text-cyan-800 ring-cyan-200" },
   Hired: { dot: "bg-violet-600", badge: "bg-violet-50 text-violet-800 ring-violet-200" },
   Unavailable: { dot: "bg-slate-400", badge: "bg-slate-100 text-slate-700 ring-slate-200" },
   Archived: { dot: "bg-stone-400", badge: "bg-stone-100 text-stone-600 ring-stone-200" },

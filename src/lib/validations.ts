@@ -79,6 +79,25 @@ export const statusUpdateSchema = z.object({
   note: z.string().trim().max(1000).optional().default(""),
 });
 
+const amount = (label: string, min: number) =>
+  z.coerce
+    .number({ error: `Enter the ${label}` })
+    .refine(Number.isFinite, `Enter the ${label}`)
+    .min(min, min > 0 ? `Enter the ${label}` : `${label} cannot be negative`)
+    .max(10_000_000, `${label} looks too large`);
+
+/** Text fields of a hire record (the poster image is validated separately). */
+export const hireSchema = z.object({
+  vacancyTitle: trimmed(2, 150, "Vacancy / job"),
+  studentLocation: z.string().trim().max(120, "Location must be at most 120 characters").optional().default(""),
+  monthlySalary: amount("monthly salary", 1),
+  commission: amount("commission", 0),
+  hiredAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Choose the hire date"),
+  note: z.string().trim().max(1000, "Note must be at most 1000 characters").optional().default(""),
+});
+
+export type HireInput = z.infer<typeof hireSchema>;
+
 export const notesSchema = z.object({
   adminNotes: z.string().max(5000, "Notes must be at most 5000 characters"),
 });

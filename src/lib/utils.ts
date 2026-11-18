@@ -44,6 +44,11 @@ export function formatRelative(value: Date | string | number) {
   return formatDate(value);
 }
 
+/** Nepali rupees with Indian digit grouping: 125000 → "Rs. 1,25,000". */
+export function formatNpr(amount: number) {
+  return `Rs. ${Math.round(amount).toLocaleString("en-IN")}`;
+}
+
 export function formatBytes(bytes: number) {
   if (!bytes) return "0 B";
   if (bytes < 1024) return `${bytes} B`;

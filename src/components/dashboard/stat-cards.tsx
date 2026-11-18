@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Users, Inbox, UserCheck, PhoneOutgoing, BadgeCheck, Archive } from "lucide-react";
+import { Users, Inbox, UserCheck, PhoneOutgoing, Presentation, BadgeCheck, Archive } from "lucide-react";
 import type { StatusCounts } from "@/lib/data/tutors";
 
 const CARDS = [
@@ -7,13 +7,14 @@ const CARDS = [
   { key: "New", label: "New Applications", icon: Inbox, href: "/admin/applications" },
   { key: "Available", label: "Available Tutors", icon: UserCheck, href: "/admin/tutors?status=Available" },
   { key: "Contacted", label: "Contacted Tutors", icon: PhoneOutgoing, href: "/admin/tutors?status=Contacted" },
+  { key: "Demo", label: "Demo Tutors", icon: Presentation, href: "/admin/tutors?status=Demo" },
   { key: "Hired", label: "Hired Tutors", icon: BadgeCheck, href: "/admin/tutors?status=Hired" },
   { key: "Archived", label: "Archived Tutors", icon: Archive, href: "/admin/tutors?status=Archived" },
 ] as const;
 
 export function StatCards({ counts, linked = true }: { counts: StatusCounts; linked?: boolean }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 2xl:grid-cols-6">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-7">
       {CARDS.map((c) => {
         const value = counts[c.key];
         const body = (

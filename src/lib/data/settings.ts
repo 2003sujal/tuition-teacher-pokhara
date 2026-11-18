@@ -1,8 +1,7 @@
 import "server-only";
 import { connectDB } from "../mongodb";
 import { Settings } from "@/models/Settings";
-import { DEFAULT_SETTINGS, type AgencySettings } from "../constants";
-import { getAppUrl } from "../utils";
+import { DEFAULT_SETTINGS, PUBLIC_SITE_URL, type AgencySettings } from "../constants";
 
 // Settings change rarely but are read on every page, so keep them in memory
 // briefly instead of a database round trip per request. Saving settings calls
@@ -60,7 +59,12 @@ export function invalidateSettings() {
   delete globalForSettings.__ttpSettings;
 }
 
-/** The link the admin shares: settings override → NEXT_PUBLIC_APP_URL/apply. */
+/**
+ * The link the admin shares: the settings override, else the live site's form.
+ * Never a localhost URL, even when the admin panel runs locally.
+ */
 export function registrationLink(settings: AgencySettings) {
-  return settings.publicApplicationUrl || `${getAppUrl()}/apply`;
+  const override = settings.publicApplicationUrl;
+  if (override && !/^https?:\/\/(localhost|127\.0\.0\.1)/i.test(override)) return override;
+  return `${PUBLIC_SITE_URL}/apply`;
 }

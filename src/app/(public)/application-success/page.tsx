@@ -5,6 +5,7 @@ import { getSettings } from "@/lib/data/settings";
 import { PublicShell } from "@/components/layout/public-shell";
 import { Button } from "@/components/ui/button";
 import { CopyText } from "@/components/forms/copy-text";
+import { FacebookFollow } from "@/components/layout/social";
 
 export const metadata: Metadata = { title: "Application Submitted", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -40,6 +41,10 @@ export default async function SuccessPage({ searchParams }: PageProps<"/applicat
               <p className="mt-1.5 text-xs text-muted-foreground">Please keep this number for future reference.</p>
             </div>
           )}
+
+          <div className="mt-6 flex justify-center text-left">
+            <FacebookFollow />
+          </div>
 
           <Button asChild size="lg" className="mt-7 w-full sm:w-auto">
             <Link href="/">

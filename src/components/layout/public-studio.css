@@ -243,3 +243,20 @@ html, body { overflow-x: clip; }
   .st-btn, .sf-btn, .sf-drop, .sf-input, .studio .sf-subjects [aria-pressed] { transition: none; }
   .sf-spin { animation-duration: 2.4s; }
 }
+
+/* Company credit row (Asva Innovation Lab) */
+.st-footer .st-company { justify-content: flex-start; align-items: center; flex-wrap: nowrap; gap: var(--st-space-md); padding-block: var(--st-space-lg); border-top: 1px solid var(--st-color-rule); }
+.st-company__cert { flex-shrink: 0; display: block; line-height: 0; }
+.st-company__cert img { width: 48px; height: auto; border-radius: 2px; outline: 1px solid var(--st-color-rule); outline-offset: -1px; background: #fff; }
+.st-company__body { display: grid; gap: 4px; min-width: 0; }
+.st-company__body p { margin: 0; }
+.st-company__name { display: inline-flex; align-items: center; gap: var(--st-space-xs); font-weight: 600; color: var(--st-color-ink); }
+.st-footer .st-company__name a { color: var(--st-color-ink); }
+
+/* Facebook follow call-out */
+.st-follow { display: flex; align-items: center; gap: var(--st-space-sm); padding: var(--st-space-sm) var(--st-space-md); border: 1px solid var(--st-color-rule); border-radius: var(--st-radius-control); background: var(--st-color-paper-hi); color: var(--st-color-ink); text-decoration: none; max-width: 30rem; transition: border-color .15s, background .15s; }
+.st-follow:hover { border-color: #1877f2; background: color-mix(in oklab, #1877f2 6%, var(--st-color-paper-hi)); }
+.st-follow__icon { display: grid; place-items: center; width: 40px; height: 40px; flex-shrink: 0; border-radius: 999px; background: #1877f2; color: #fff; }
+.st-follow__icon svg { width: 22px; height: 22px; }
+.st-follow__text { display: grid; gap: 2px; font-size: var(--st-text-small); color: var(--st-color-ink-2); }
+.st-follow__text strong { font-size: var(--st-text-body, 1rem); color: var(--st-color-ink); font-weight: 600; }

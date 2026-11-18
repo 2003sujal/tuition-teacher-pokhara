@@ -2,6 +2,7 @@ export const TUTOR_STATUSES = [
   "New",
   "Available",
   "Contacted",
+  "Demo",
   "Hired",
   "Unavailable",
   "Archived",
@@ -64,6 +65,23 @@ export const CV_TYPES_LABEL = "PDF, Word (DOC/DOCX) or a photo (JPG, PNG, WEBP)"
 
 export const LOGO_MAX_BYTES = 1024 * 1024;
 export const LOGO_ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
+
+// Vacancy posters attached to hire records (resized in the browser first).
+export const POSTER_MAX_BYTES = 4 * 1024 * 1024;
+export const POSTER_ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp"];
+
+/** Live site: the registration link the admin copies always points here. */
+export const PUBLIC_SITE_URL = "https://tuition-teacher-pokhara.vercel.app";
+export const FACEBOOK_URL = "https://www.facebook.com/tuitionteacherpokhara/";
+
+export const COMPANY = {
+  name: "Asva Innovation Lab Pvt. Ltd.",
+  website: "https://asva.com.np/",
+  regdNo: "398769/83/84",
+  panNo: "623692657",
+  certificate: "/asva.png",
+  mapUrl: "https://maps.app.goo.gl/4qWHREYWgfWsPsSeA",
+};
 
 export const SESSION_COOKIE = "ttp_session";
 export const SESSION_TTL_SECONDS = 60 * 60 * 8; // 8 hours
