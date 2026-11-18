@@ -12,6 +12,7 @@ import {
   BadgeCheck,
   Presentation,
   Wallet,
+  FileSignature,
   Archive,
   BarChart3,
   Settings,
@@ -78,6 +79,7 @@ const NAV: { heading?: string; items: NavItem[] }[] = [
     heading: "Insights",
     items: [
       { label: "Revenue", href: "/admin/revenue", icon: Wallet, match: (p) => p === "/admin/revenue" },
+      { label: "Signed Agreements", href: "/admin/agreements", icon: FileSignature, match: (p) => p.startsWith("/admin/agreements") },
       { label: "Reports & Analytics", href: "/admin/reports", icon: BarChart3, match: (p) => p === "/admin/reports" },
       { label: "Settings", href: "/admin/settings", icon: Settings, match: (p) => p === "/admin/settings" },
     ],
@@ -90,6 +92,7 @@ const CRUMB_LABELS: Record<string, string> = {
   applications: "New Applications",
   reports: "Reports & Analytics",
   revenue: "Revenue",
+  agreements: "Signed Agreements",
   settings: "Settings",
 };
 
@@ -206,7 +209,7 @@ function Breadcrumbs() {
   parts.forEach((part, i) => {
     const href = "/admin/" + parts.slice(0, i + 1).join("/");
     const isLast = i === parts.length - 1;
-    const label = CRUMB_LABELS[part] ?? (parts[0] === "tutors" ? "Profile" : part);
+    const label = CRUMB_LABELS[part] ?? (parts[0] === "tutors" ? "Profile" : parts[0] === "agreements" ? "Document" : part);
     crumbs.push({ label, href: isLast ? undefined : href });
   });
   if (pathname === "/admin/tutors" && status) {

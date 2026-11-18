@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/auth";
 import { isObjectId } from "@/lib/api";
 import { getTutor, getTutorActivity } from "@/lib/data/tutors";
 import { getTutorHires } from "@/lib/data/hires";
+import { getTutorAgreements } from "@/lib/data/agreements";
 import { HireRecords } from "@/components/tutors/hire-records";
 import { formatMobile } from "@/lib/phone";
 import { formatBytes, formatDateTime, initials } from "@/lib/utils";
@@ -36,7 +37,12 @@ export default async function TutorProfilePage({ params }: PageProps<"/admin/tut
   const { id } = await params;
   if (!isObjectId(id)) notFound();
 
-  const [tutor, activity, hires] = await Promise.all([getTutor(id), getTutorActivity(id), getTutorHires(id)]);
+  const [tutor, activity, hires, agreements] = await Promise.all([
+    getTutor(id),
+    getTutorActivity(id),
+    getTutorHires(id),
+    getTutorAgreements(id),
+  ]);
   if (!tutor) notFound();
 
   const isPdf = tutor.cvFileType === "application/pdf";
@@ -118,7 +124,16 @@ export default async function TutorProfilePage({ params }: PageProps<"/admin/tut
                   )}
                 </Detail>
                 <Detail icon={FileSignature} label="Service agreement">
-                  {tutor.agreementAcceptedAt ? (
+                  {agreements.length > 0 ? (
+                    <span className="flex flex-col gap-1">
+                      {agreements.map((a) => (
+                        <Link key={a.id} href={`/admin/agreements/${a.id}`} className="text-emerald-700 hover:underline">
+                          Accepted {formatDateTime(a.acceptedAt)} · <span className="font-mono text-[12.5px]">{a.refNo}</span> · View
+                          document
+                        </Link>
+                      ))}
+                    </span>
+                  ) : tutor.agreementAcceptedAt ? (
                     <span className="text-emerald-700">Accepted {formatDateTime(tutor.agreementAcceptedAt)}</span>
                   ) : (
                     <span className="font-normal text-muted-foreground">Not signed yet — send the agreement link from the dashboard</span>

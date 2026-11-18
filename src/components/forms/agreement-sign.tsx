@@ -1,20 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { CircleCheck, Loader2, Printer } from "lucide-react";
+import { AgreementSignatures } from "@/components/agreement/agreement-document";
 
-const CHECKS = [
-  { name: "acceptCharges", text: "Yes, I understand and accept the service charges in Clause 2." },
-  { name: "acceptDemo", text: "Yes, I understand and accept the demo class policy in Clause 3, including the deposit." },
-  { name: "acceptConfidential", text: "Yes, I will keep this agreement confidential and will not discuss it with parents or students." },
-  { name: "acceptAll", text: "I have read this agreement in full, I understand it, and I agree to follow it." },
-] as const;
+// API field for each statement, in the order of AGREEMENT_STATEMENTS.
+const CHECK_NAMES = ["acceptCharges", "acceptDemo", "acceptConfidential", "acceptAll"] as const;
+type CheckName = (typeof CHECK_NAMES)[number];
 
-type CheckName = (typeof CHECKS)[number]["name"];
-
-export function AgreementSign({ agencyName, companyName, today }: { agencyName: string; companyName: string; today: string }) {
+export function AgreementSign({
+  agencyName,
+  companyName,
+  today,
+  statements,
+}: {
+  agencyName: string;
+  companyName: string;
+  today: string;
+  statements: string[];
+}) {
+  const CHECKS = CHECK_NAMES.map((name, i) => ({ name, text: statements[i] ?? "" }));
   const [fullName, setFullName] = useState("");
   const [mobile, setMobile] = useState("");
   const [checks, setChecks] = useState<Record<CheckName, boolean>>({
@@ -27,7 +33,7 @@ export function AgreementSign({ agencyName, companyName, today }: { agencyName: 
   const [formError, setFormError] = useState("");
   const [notRegistered, setNotRegistered] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [signed, setSigned] = useState<{ name: string; at: string } | null>(null);
+  const [signed, setSigned] = useState<{ name: string; at: string; refNo: string } | null>(null);
 
   const allChecked = CHECKS.every((c) => checks[c.name]);
 
@@ -51,6 +57,7 @@ export function AgreementSign({ agencyName, companyName, today }: { agencyName: 
         return;
       }
       setSigned({
+        refNo: data.refNo ?? "",
         name: fullName.trim(),
         at: new Intl.DateTimeFormat("en-GB", {
           day: "numeric",
@@ -70,31 +77,12 @@ export function AgreementSign({ agencyName, companyName, today }: { agencyName: 
 
   return (
     <>
-      <section className="ag__signatures" aria-label="Signatures">
-        <div className="ag__sig">
-          <div className="ag__sig-space">
-            <Image
-              src="/STAMP.png"
-              alt={`Official stamp of ${companyName}`}
-              width={580}
-              height={134}
-              className="ag__stamp"
-              sizes="240px"
-            />
-          </div>
-          <p className="ag__sig-line">Authorised signatory</p>
-          <p className="ag__sig-name">For {agencyName}</p>
-          <p className="ag__sig-sub">{companyName}</p>
-        </div>
-        <div className="ag__sig">
-          <div className="ag__sig-space">
-            {signed ? <span className="ag__signature">{signed.name}</span> : <span className="ag__sig-pending">Awaiting signature</span>}
-          </div>
-          <p className="ag__sig-line">Tutor</p>
-          <p className="ag__sig-name">{signed ? signed.name : "Name of the Tutor"}</p>
-          <p className="ag__sig-sub">{signed ? `Accepted ${signed.at}` : `Date: ${today}`}</p>
-        </div>
-      </section>
+      <AgreementSignatures
+        agencyName={agencyName}
+        companyName={companyName}
+        tutorName={signed?.name ?? null}
+        tutorSub={signed ? `Accepted ${signed.at}` : `Date: ${today}`}
+      />
 
       {signed ? (
         <div className="ag__done" role="status">
@@ -102,7 +90,7 @@ export function AgreementSign({ agencyName, companyName, today }: { agencyName: 
           <div>
             <p className="ag__done-title">Agreement accepted. Thank you, {signed.name.split(" ")[0]}!</p>
             <p>
-              Your acceptance has been recorded on {signed.at}. Our team will contact you about tuition opportunities.
+              Your acceptance has been recorded on {signed.at}{signed.refNo && <> (Ref. No. <strong>{signed.refNo}</strong>)</>}. Our team will contact you about tuition opportunities.
               You can print or save this page as a PDF for your records.
             </p>
             <button type="button" className="sf-btn ag__print" onClick={() => window.print()}>

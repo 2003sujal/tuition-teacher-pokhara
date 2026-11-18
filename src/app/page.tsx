@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, FileText, MapPin, Smartphone } from "lucide-react";
 import { getSettings } from "@/lib/data/settings";
 import { PublicShell } from "@/components/layout/public-shell";
+import { FacebookFollow } from "@/components/layout/social";
 import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
@@ -40,6 +41,9 @@ export default async function HomePage() {
             </li>
           ))}
         </ul>
+        <div className="mt-8 flex w-full justify-center text-left">
+          <FacebookFollow />
+        </div>
       </div>
     </PublicShell>
   );

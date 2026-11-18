@@ -57,7 +57,7 @@
   text-transform: uppercase;
   color: var(--ag-gold);
 }
-.studio .ag__titleblock h1 {
+.ag .ag__titleblock h1 {
   font-family: var(--ag-serif);
   font-size: clamp(1.9rem, 4.5vw, 2.75rem);
   font-weight: 600;
@@ -70,8 +70,8 @@
 .ag__reg { margin: 4px 0 0; font-family: var(--st-font-body); font-size: var(--st-text-small); color: var(--st-color-muted); }
 
 .ag__section { padding-top: var(--st-space-lg); }
-.studio .ag__section h2,
-.studio .ag__form h2 {
+.ag .ag__section h2,
+.ag .ag__form h2 {
   display: flex;
   align-items: center;
   gap: var(--st-space-sm);
@@ -184,6 +184,13 @@
 .ag__done-title { font-weight: 600; font-size: 1.1rem; }
 .ag__print { margin-top: var(--st-space-xs); }
 
+/* Admin copy of a signed agreement */
+.ag.ag--admin { padding: 0 0 var(--st-space-xl); }
+.ag__accepted { display: grid; gap: var(--st-space-xs); margin: var(--st-space-xs) 0 0; padding: 0; list-style: none; }
+.ag__accepted li { display: flex; gap: var(--st-space-xs); }
+.ag__accepted span { color: var(--st-color-safe); font-size: 1.1em; line-height: 1.5; }
+.ag__evidence { margin: var(--st-space-lg) 0 0; padding-top: var(--st-space-sm); border-top: 1px dashed var(--st-color-rule); font-family: var(--st-font-body); font-size: 12px; color: var(--st-color-muted); text-align: center; overflow-wrap: anywhere; }
+
 @media (max-width: 40rem) {
   .ag { padding-top: var(--st-space-md); }
   .ag__paper { font-size: 1rem; }
@@ -198,7 +205,10 @@
 }
 
 @media print {
-  .st-header, .st-footer, .ag__form, .ag__print, [aria-label="Notifications alt+T"] { display: none !important; }
+  .st-header, .st-footer, .ag__form, .ag__print, .no-print, [aria-label="Notifications alt+T"] { display: none !important; }
+  /* Admin copy: print only the document, not the admin shell. */
+  body:has(.ag) aside, body:has(.ag) header.sticky { display: none !important; }
+  body:has(.ag) main { padding: 0 !important; }
   .ag { padding: 0; }
   .ag__paper { box-shadow: none; max-width: none; }
   .ag__table thead th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }

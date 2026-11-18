@@ -5,7 +5,12 @@ import { normalizeNepaliMobile } from "@/lib/phone";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { jsonError, validationError } from "@/lib/api";
 import { AGREEMENT_VERSION, type TutorStatus } from "@/lib/constants";
+import { getSettings } from "@/lib/data/settings";
+import { buildAgreement, agreementPlainText } from "@/lib/agreement";
+import { hashAgreement } from "@/lib/agreement-record";
 import { Tutor } from "@/models/Tutor";
+import { SignedAgreement } from "@/models/SignedAgreement";
+import { nextAgreementRef } from "@/models/Counter";
 import { ActivityLog } from "@/models/ActivityLog";
 
 export const runtime = "nodejs";
@@ -35,7 +40,9 @@ export async function POST(req: Request) {
   const mobile = normalizeNepaliMobile(parsed.data.mobileNumber);
   if (!mobile) return jsonError("Enter a valid Nepali mobile number", 422, { fields: { mobileNumber: "Enter a valid Nepali mobile number" } });
 
-  const tutor = await Tutor.findOne({ normalizedMobileNumber: mobile }).sort({ createdAt: -1 }).select("status fullName agreementAcceptedAt");
+  const tutor = await Tutor.findOne({ normalizedMobileNumber: mobile })
+    .sort({ createdAt: -1 })
+    .select("status fullName applicationId agreementAcceptedAt");
   if (!tutor) {
     return jsonError(
       "This mobile number is not registered with us. Please register as a tutor first, then accept the agreement.",
@@ -45,6 +52,38 @@ export async function POST(req: Request) {
   }
 
   const now = new Date();
+
+  // 1. Save the evidence first: the full document exactly as shown, who signed,
+  //    when and from where, sealed with a hash. If this fails, nothing changes.
+  const settings = await getSettings();
+  const content = buildAgreement({ agencyName: settings.agencyName, date: now });
+  const contentText = agreementPlainText(content);
+  let refNo: string;
+  try {
+    refNo = await nextAgreementRef();
+    const evidence = {
+      refNo,
+      signedName: parsed.data.fullName,
+      mobileNumber: mobile,
+      acceptedAt: now,
+      version: content.version,
+      contentText,
+    };
+    await SignedAgreement.create({
+      ...evidence,
+      tutorId: tutor._id,
+      tutorApplicationId: tutor.applicationId,
+      content,
+      contentHash: hashAgreement(evidence),
+      ipAddress: clientIp(req),
+      userAgent: (req.headers.get("user-agent") ?? "").slice(0, 500),
+    });
+  } catch (err) {
+    console.error("Failed to save signed agreement", err);
+    return jsonError("Could not save your agreement. Please try again.", 500);
+  }
+
+  // 2. Update the tutor and move them to Contacted.
   const previous = tutor.status as TutorStatus;
   tutor.agreementAcceptedAt = now;
   tutor.agreementSignedName = parsed.data.fullName;
@@ -59,8 +98,8 @@ export async function POST(req: Request) {
     {
       tutorId: tutor._id,
       action: "agreement_accepted",
-      newValue: AGREEMENT_VERSION,
-      note: `Signed as "${parsed.data.fullName}"`,
+      newValue: refNo,
+      note: `Signed as "${parsed.data.fullName}" (version ${AGREEMENT_VERSION})`,
       adminName: by,
     },
   ];
@@ -76,5 +115,5 @@ export async function POST(req: Request) {
   }
   await ActivityLog.insertMany(logs).catch((err) => console.error("Failed to write activity log", err));
 
-  return NextResponse.json({ ok: true, acceptedAt: now.toISOString(), firstName: tutor.fullName.split(" ")[0] });
+  return NextResponse.json({ ok: true, refNo, acceptedAt: now.toISOString(), firstName: tutor.fullName.split(" ")[0] });
 }
