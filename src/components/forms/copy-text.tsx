@@ -48,10 +48,14 @@ export function CopyLinkButton({
   url,
   variant = "default",
   className,
+  label = "Copy Registration Link",
+  copiedToast = "Registration link copied",
 }: {
   url: string;
   variant?: "default" | "secondary" | "soft";
   className?: string;
+  label?: string;
+  copiedToast?: string;
 }) {
   const [done, setDone] = useState(false);
   return (
@@ -62,7 +66,7 @@ export function CopyLinkButton({
       onClick={async () => {
         if (await copy(url)) {
           setDone(true);
-          toast.success("Registration link copied", { description: url });
+          toast.success(copiedToast, { description: url });
           setTimeout(() => setDone(false), 2000);
         } else {
           toast.error("Could not copy. Please copy the link manually.");
@@ -70,7 +74,7 @@ export function CopyLinkButton({
       }}
     >
       {done ? <Check aria-hidden /> : <Link2 aria-hidden />}
-      {done ? "Link copied" : "Copy Registration Link"}
+      {done ? "Link copied" : label}
     </Button>
   );
 }

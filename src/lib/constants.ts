@@ -79,6 +79,7 @@ export const COMPANY = {
   website: "https://asva.com.np/",
   regdNo: "398769/83/84",
   panNo: "623692657",
+  logo: "/logoasva.png",
   certificate: "/asva.png",
   mapUrl: "https://maps.app.goo.gl/4qWHREYWgfWsPsSeA",
 };

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, FileText, Users } from "lucide-react";
+import { ArrowRight, ExternalLink, FileText, Users } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
 import { getRecentTutors, getStatusCounts } from "@/lib/data/tutors";
 import { getLocationDistribution, getMonthlyRegistrations } from "@/lib/data/analytics";
 import { getSettings, registrationLink } from "@/lib/data/settings";
-import { TUTOR_STATUSES } from "@/lib/constants";
+import { COMPANY, PUBLIC_SITE_URL, TUTOR_STATUSES } from "@/lib/constants";
 import { formatRelative } from "@/lib/utils";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatCards } from "@/components/dashboard/stat-cards";
@@ -28,6 +28,7 @@ export default async function DashboardPage() {
     getSettings(),
   ]);
   const link = registrationLink(settings);
+  const certificateLink = `${PUBLIC_SITE_URL}${COMPANY.certificate}`;
   const firstName = admin.name.split(" ")[0];
   const thisMonth = monthly.at(-1)?.count ?? 0;
 
@@ -169,6 +170,29 @@ export default async function DashboardPage() {
           <p className="mt-0.5 truncate font-mono text-[13px] text-muted-foreground">{link}</p>
         </div>
         <CopyLinkButton url={link} variant="soft" />
+      </Card>
+
+      <Card className="mt-4 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold">Company registration certificate</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {COMPANY.name} · Regd. No. {COMPANY.regdNo} · VAT/PAN {COMPANY.panNo}
+          </p>
+          <p className="mt-0.5 truncate font-mono text-[13px] text-muted-foreground">{certificateLink}</p>
+        </div>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <Button asChild variant="secondary">
+            <a href={COMPANY.certificate} target="_blank" rel="noopener">
+              <ExternalLink aria-hidden /> View
+            </a>
+          </Button>
+          <CopyLinkButton
+            url={certificateLink}
+            variant="soft"
+            label="Copy Certificate Link"
+            copiedToast="Certificate link copied"
+          />
+        </div>
       </Card>
     </>
   );
