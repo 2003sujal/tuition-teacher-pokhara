@@ -29,7 +29,7 @@ export type AgreementContent = {
 
 /** The four statements the tutor ticks before signing. */
 export const AGREEMENT_STATEMENTS = [
-  "Yes, I understand and accept the service charges and payment terms in Clause 2 (half within 7 days of selection, the rest within 1 month after my first salary).",
+  "Yes, I understand and accept the service charges and payment terms in Clause 2 (half within 7 days of selection, the rest within 1 month after my first salary), and that the full service charge is payable and non-refundable once I am selected, even if the tuition is cancelled or discontinued.",
   "Yes, I understand and accept the demo class policy in Clause 3, including the deposit.",
   "Yes, I will keep this agreement confidential and will not discuss it with parents or students.",
   "I have read this agreement in full, I understand it, and I agree to follow it. The citizenship certificate I attach is my own and genuine.",
@@ -109,6 +109,14 @@ export function buildAgreement({ agencyName, date }: { agencyName: string; date:
           {
             type: "note",
             text: "Example: for a service charge of Rs. 3,600, Rs. 1,800 is paid within 7 days of selection and Rs. 1,800 within 1 month after the first salary is received.",
+          },
+          {
+            type: "p",
+            text: "**The full service charge is payable once the Tutor is selected.** Once the parents select the Tutor after the demo class, the **entire** service charge becomes due and must be paid in full under (a) and (b) above, **regardless of whether the parents cancel the tuition within a few days or discontinue it later**.",
+          },
+          {
+            type: "p",
+            text: "**No refunds or reductions.** After the Tutor is selected, the service charge is **non-refundable** and **will not be reduced, waived or adjusted** for any reason, including early cancellation or discontinuation of the tuition by the parents or the student.",
           },
         ],
       },

@@ -88,7 +88,7 @@ export const COMPANY = {
 // ---- Tutor service agreement ---------------------------------------------
 
 /** Bump when the agreement wording changes; stored with each acceptance. */
-export const AGREEMENT_VERSION = "2026-11.2";
+export const AGREEMENT_VERSION = "2026-11.3";
 
 /** Citizenship certificate attached when signing (kept private, like CVs). */
 export const CITIZENSHIP_ALLOWED: Record<string, string> = {
